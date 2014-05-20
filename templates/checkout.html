@@ -1,17 +1,9 @@
-<div class="checkout-header">
-    <div class="float-right large">
-        {$cart_total = $wa->shop->cart->total()}
-        [`Order total`]: <strong>{shop_currency_html($cart_total, true)}</strong>
-    </div>
-    <h3><a href="{$wa_app_url}">{$wa->shop->settings("name")}</a></h3>
-</div>
-
 <div class="checkout">
 
     {if isset($checkout_steps)}
+        <form class="checkout-form" method="post" action="">
+            {foreach $checkout_steps as $step_id => $s}
 
-        {foreach $checkout_steps as $step_id => $s}
-            <form class="checkout-form" method="post" action="">
                 <div class="checkout-step step-{$step_id}" data-step="{$step_id}">
 
                     <h2 class="{if isset($_upcoming_flag)}upcoming{/if}">
@@ -65,9 +57,9 @@
                     </div>
 
                 </div>
-            </form>
-        {/foreach}
 
+            {/foreach}
+        </form>
     {/if}
 
 </div>
@@ -97,9 +89,9 @@
 
         var steps = ['{implode("','", array_keys($checkout_steps))}'];
 
-        $("form.checkout-form").on('change', 'input:not([name="user_type"]),select', function() {
-            var f = $(this).closest('form.checkout-form');
-            var cur_step = f.find('.checkout-step').data('step');
+        $("form.checkout-form").on('change', 'input:not([name="user_type"],[name="login"],[name="password"],#create-user),select', function() {
+            var f = $(this).closest("form.checkout-form");
+            var cur_step = $(this).closest('.checkout-step').data('step');
 
             var j = steps.indexOf(cur_step);
             for (var i in steps) {
@@ -141,91 +133,9 @@
             } else {
                 f.find('em.errormsg').remove();
             }
-
-
-            $('<span class="loading"> <i class="icon16 loading"></i></span>').insertAfter(f.find('input:submit:last').attr('disabled', 'disabled'));
-            $.post(f.attr('action') || window.location, $("form.checkout-form").serialize(), function(response) {
-                console.log(response);
-                //if (response.redirect) {
-                //    window.location.href = response.redirect;
-                //}
-                /*
-                 for (var i in steps) {
-                 var step = steps[i];
-                 var html = $(response).find('.step-' + step).html();
-                 $('.step-' + step).html(html);
-                 }
-                 
-                 if ($("form.checkout-form").find('.error:first').length) {
-                 var destination = $("form.checkout-form").find('.error:first').offset().top;
-                 jQuery("html,body").animate({
-                 scrollTop: destination
-                 });
-                 }
-                 
-                 auth();
-                 */
-            }, "json");
-            return false;
+            return true;
 
         });
-        /*
-         $("form.checkout-form").on('submit', function() {
-         var f = $(this);
-         var step = f.find('.checkout-content').data('step-id');
-         if (step == 'payment' || step == 'shipping') {
-         if (!f.find('input[name="' + step + '_id"]:checked').not(':disabled').length) {
-         if (!f.find('em.errormsg').length) {
-         $('<em class="errormsg inline">' + (step == 'payment' ? '[`Please select payment option`]' :
-         '[`Please select shipping option`]') + '</em>').insertAfter(f.find('input:submit:last'));
-         }
-         return false;
-         } else {
-         f.find('em.errormsg').remove();
-         }
-         }
-         if (f.hasClass('last') || ($("#login-form").length && !$("#login-form input:submit").attr('disabled'))) {
-         return true;
-         }
-         $('<span class="loading"> <i class="icon16 loading"></i></span>').insertAfter(f.find('input:submit:last').attr('disabled', 'disabled'));
-         $.post(f.attr('action') || window.location, f.serialize(), function(response) {
-         var content = $(response);
-         var step_id = content.data('step-id');
-         var current = $(".checkout-step .checkout-step-content:visible");
-         var current_step_id = current.find(".checkout-content").data('step-id');
-         if (current_step_id != step_id) {
-         current.animate({
-         height: 0
-         }, 200, function() {
-         $(this).hide();
-         });
-         $(".checkout-step.step-" + step_id + " .checkout-step-content").css({
-         height: 'auto'
-         }).show(200, function() {
-         $(document).scrollTop($(".checkout-step.step-" + step_id).offset().top);
-         });
-         current.parent().find('a.back').hide();
-         }
-         $(".checkout-step.step-" + step_id + " .checkout-content").replaceWith(content);
-         $(".checkout-step.step-" + step_id + " a.back").show();
-         $(".checkout-step.step-" + step_id + " input[type=submit]:last").show();
-         if (current_step_id != step_id) {
-         $(".checkout-step.step-" + step_id + " .checkout-step-content").show(0).css({
-         height: 'auto'
-         });
-         }
-         $(".checkout-step.step-" + step_id + ' h2').removeClass('upcoming')
-         $(".checkout-step.step-" + step_id).next('.checkout-step').each(function() {
-         $(this).find('h2').addClass('upcoming');
-         });
-         $(".checkout-step.step-" + step_id).prev('.checkout-step').each(function() {
-         $(this).find('h2').removeClass('upcoming');
-         });
-         }).always(function() {
-         f.find('span.loading').remove();
-         f.find('input:submit:last').removeAttr('disabled');
-         });
-         return false;
-         });*/
+
     });
 </script>

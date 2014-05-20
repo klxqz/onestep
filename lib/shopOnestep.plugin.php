@@ -9,7 +9,6 @@ class shopOnestepPlugin extends shopPlugin {
         self::checkout();
 
         $view = wa()->getView();
-        //$view->assign('frontend_name', $this->getSettings('frontend_name'));
         $template_path = wa()->getAppPath('plugins/onestep/templates/onestep.html', 'shop');
         $html = $view->fetch($template_path);
         return $html;
@@ -18,122 +17,44 @@ class shopOnestepPlugin extends shopPlugin {
     public static function checkout() {
         $view = wa()->getView();
         $steps = wa()->getConfig()->getCheckoutSettings();
-        /*
-          $current_step = waRequest::param('step', waRequest::request('step'));
 
-          if (!$current_step) {
-          $current_step = key($steps);
-          } */
+        $cart = new shopCart();
+        if (!$cart->count()) {
+            return false;
+        }
 
-
-        foreach ($steps as $current_step => $step) {
-            //$title = _w('Checkout');
-            if ($current_step == 'success') {
-
-                $order_id = waRequest::get('order_id');
-                if (!$order_id) {
-                    $order_id = wa()->getStorage()->get('shop/order_id');
-                    $payment_success = false;
-                } else {
-                    $payment_success = true;
-                    $view->assign('payment_success', true);
-                }
-                if (!$order_id) {
-                    wa()->getResponse()->redirect(wa()->getRouteUrl('shop/frontend'));
-                }
-                $order_model = new shopOrderModel();
-                $order = $order_model->getById($order_id);
-                if (!$payment_success) {
-                    $order_params_model = new shopOrderParamsModel();
-                    $order['params'] = $order_params_model->get($order_id);
-                    $order_items_model = new shopOrderItemsModel();
-                    $order['items'] = $order_items_model->getByField('order_id', $order_id, true);
-                    $payment = '';
-                    if (!empty($order['params']['payment_id'])) {
-                        try {
-                            /**
-                             * @var waPayment $plugin
-                             */
-                            $plugin = shopPayment::getPlugin(null, $order['params']['payment_id']);
-                            $payment = $plugin->payment(waRequest::post(), shopPayment::getOrderData($order, $plugin), true);
-                        } catch (waException $ex) {
-                            $payment = $ex->getMessage();
-                        }
-                    }
-                    $order['id'] = shopHelper::encodeOrderId($order_id);
-                    $this->getResponse()->addGoogleAnalytics($this->getGoogleAnalytics($order));
-                } else {
-                    $order['id'] = shopHelper::encodeOrderId($order_id);
-                }
-                $view->assign('order', $order);
-                if (isset($payment)) {
-                    $view->assign('payment', $payment);
-                }
+        if (waRequest::method() == 'post') {
+            if (waRequest::post('wa_auth_login')) {
+                $login_action = new shopLoginAction();
+                $login_action->run();
             } else {
-
-                $cart = new shopCart();
-                if (!$cart->count() && $current_step != 'error') {
-                    $current_step = 'error';
-                    $view->assign('error', _w('Your shopping cart is empty. Please add some products to cart, and then proceed to checkout.'));
+                $error = false;
+                foreach ($steps as $step_id => $step) {
+                    $step_instance = self::getStep($step_id);
+                    if(!$step_instance->execute()){
+                        $error = true;
+                    }
                 }
 
-                if ($current_step != 'error') {
-                    if (waRequest::method() == 'post') {
-                        if (waRequest::post('wa_auth_login')) {
-                            $login_action = new shopLoginAction();
-                            $login_action->run();
-                        } else {
-                            foreach ($steps as $step_id => $step) {
-                                if ($step_id == $current_step) {
-                                    $step_instance = self::getStep($step_id);
-                                    $step_instance->execute();
-                                    
-                                }
-                            }
 
-
-                            // last step
-                            /*
-                            if (waRequest::post('confirmation')) {
-                                if (self::createOrder()) {
-                                    $response = array(
-                                        'redirect' => wa()->getRouteUrl('/frontend/checkout', array('step' => 'success'))
-                                    );
-                                    exit(json_encode($response));
-                                    //wa()->getResponse()->redirect(wa()->getRouteUrl('/frontend/checkout', array('step' => 'success')));
-                                }
-                            }*/
-                        }
-                    } else {
-                        $view->assign('error', '');
+                if (waRequest::post('confirmation') && !$error) {
+                    if (self::createOrder()) {
+                        wa()->getResponse()->redirect(wa()->getRouteUrl('/frontend/checkout', array('step' => 'success')));
                     }
-                    //$title .= ' - ' . $steps[$current_step]['name'];
-
-                    $steps[$current_step]['content'] = self::getStep($current_step)->display();
-                    $view->assign('checkout_steps', $steps);
                 }
             }
         }
 
-
-        //$this->getResponse()->setTitle($title);
-        //$view->assign('checkout_current_step', $current_step);
-
-        /**
-         * @event frontend_checkout
-         * @return array[string]string $return[%plugin_id%] html output
-         */
-        $event_params = array('step' => $current_step);
-        $view->assign('frontend_checkout', wa()->event('frontend_checkout', $event_params));
-        /*
-          if (waRequest::isXMLHttpRequest()) {
-          $this->setThemeTemplate('checkout.' . $current_step . '.html');
-          } else {
-          $this->setLayout(new shopFrontendLayout());
-          $this->setThemeTemplate('checkout.html');
-          }
-         * 
-         */
+        foreach ($steps as $step_id => $step) {
+            $steps[$step_id]['content'] = self::getStep($step_id)->display();
+            /**
+             * @event frontend_checkout
+             * @return array[string]string $return[%plugin_id%] html output
+             */
+            $event_params = array('step' => $step_id);
+            $view->assign('frontend_checkout', wa()->event('frontend_checkout', $event_params));
+        }
+        $view->assign('checkout_steps', $steps);
     }
 
     protected function createOrder() {
