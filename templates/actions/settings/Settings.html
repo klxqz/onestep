@@ -8,26 +8,22 @@
         overflow-x: auto;
     }
 </style>
-<h1>Новинки</h1>
+<h1>Заказ в один шаг</h1>
 <div     class="fields form">
     <form action="?plugin=novelties&action=save" method="post" id="plugins-settings-form">
     {$wa->csrf()}
     
     
     {literal}
-    <p>{shopNoveltiesPlugin::display()} - Код хелпера вывода</p>
+    <p>{shopOnestepPlugin::display()} - Код хелпера вывода</p>
     {/literal}
-    <p class="gray">
-    <i class="icon16 exclamation"></i>
-    Используя этот код Вы можете осуществить вывод "Новинок" в любом месте вашей темы оформления, это позволяет избавиться от привязки к конкретным местам вывода плагина
-    </p>
     
     <div class="field">
         <div class="name">
             Статус
         </div>
         <div class="value">
-            <select name="shop_novelties[status]">
+            <select name="shop_onestep[status]">
                 <option {if $settings.status == 1} selected="selected"{/if} value="1">Включен</option>
                 <option {if $settings.status == 0} selected="selected"{/if} value="0">Выключен</option>
             </select>

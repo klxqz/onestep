@@ -1,9 +1,9 @@
 <?php
 
-class shopNoveltiesPluginSettingsAction extends waViewAction
+class shopOnestepPluginSettingsAction extends waViewAction
 {
-    protected $tmp_path = 'plugins/novelties/templates/Novelties.html';
-    protected $plugin_id = array('shop', 'novelties');
+    protected $tmp_path = 'plugins/onestep/templates/onestep.html';
+    protected $plugin_id = array('shop', 'onestep');
     
     public function execute()
     {

@@ -5,7 +5,7 @@ return array(
     'description' => 'Список последних добавленных продуктов',
     'vendor' => '985310',
     'version' => '1.0.0',
-    'img' => 'img/novelties.png',
+    'img' => 'img/onestep.png',
     'shop_settings' => true,
     'frontend' => true,
     'handlers' => array(
