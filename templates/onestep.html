@@ -6,17 +6,6 @@
     <p>[`Your shopping cart is empty.`]</p>
 
 {else}
-{*
-    {$crossselling = $wa->shop->crossSelling($cart.items, 'product_id')}
-    {if $crossselling}
-        <div class="sidebar right300px">
-            <h3>[`Better together`]</h3>
-            <div class="related small">
-                {include file="list-table.html" products=$crossselling}
-            </div>
-        </div>
-    {/if}
-*}
     <!-- general welcome text -->
     <div class="content right300px">
 
@@ -118,7 +107,7 @@
 
 </form>
 
-{include file="./checkout.html"}   
+{include file=$checkout_path}   
 
 </div>
 

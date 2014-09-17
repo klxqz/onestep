@@ -5,12 +5,23 @@ class shopOnestepPlugin extends shopPlugin {
     protected static $steps = array();
 
     public static function display() {
+        $app_settings_model = new waAppSettingsModel();
+        $settings = $app_settings_model->get(array('shop', 'onestep'));
 
         self::checkout();
 
         $view = wa()->getView();
-        $template_path = wa()->getAppPath('plugins/onestep/templates/onestep.html', 'shop');
-        $html = $view->fetch($template_path);
+        $onestep_path = wa()->getDataPath('plugins/onestep/templates/onestep.html', false, 'shop', true);
+        if (!file_exists($onestep_path)) {
+            $onestep_path = wa()->getAppPath('plugins/onestep/templates/onestep.html', 'shop');
+        }
+        $checkout_path = wa()->getDataPath('plugins/onestep/templates/checkout.html', false, 'shop', true);
+        if (!file_exists($checkout_path)) {
+            $checkout_path = wa()->getAppPath('plugins/onestep/templates/checkout.html', 'shop');
+        }
+        $view->assign('checkout_path', $checkout_path);
+        $view->assign('settings', $settings);
+        $html = $view->fetch($onestep_path);
         return $html;
     }
 
@@ -31,7 +42,7 @@ class shopOnestepPlugin extends shopPlugin {
                 $error = false;
                 foreach ($steps as $step_id => $step) {
                     $step_instance = self::getStep($step_id);
-                    if(!$step_instance->execute()){
+                    if (!$step_instance->execute()) {
                         $error = true;
                     }
                 }
