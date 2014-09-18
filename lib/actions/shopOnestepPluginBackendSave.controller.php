@@ -3,8 +3,9 @@
 class shopOnestepPluginBackendSaveController extends waJsonController {
 
     protected $templates = array(
-        'onestep' => array('name' => 'Главный шаблон', 'tpl_path' => 'plugins/onestep/templates/onestep.html'),
-        'checkout' => array('name' => 'Шаблон оформления заказа (checkout.html)', 'tpl_path' => 'plugins/onestep/templates/checkout.html'),
+        'onestep' => array('name' => 'Главный шаблон', 'tpl_path' => 'plugins/onestep/templates/onestep.html', 'public' => false),
+        'checkout' => array('name' => 'Шаблон оформления заказа (checkout.html)', 'tpl_path' => 'plugins/onestep/templates/checkout.html', 'public' => false),
+        'cart_js' => array('name' => 'cart.js', 'tpl_path' => 'plugins/onestep/js/cart.js', 'public' => true),
     );
     protected $plugin_id = array('shop', 'onestep');
 
@@ -22,7 +23,7 @@ class shopOnestepPluginBackendSaveController extends waJsonController {
 
             foreach ($this->templates as $id => $template) {
                 if (isset($reset_tpls[$id])) {
-                    $template_path = wa()->getDataPath($template['tpl_path'], false, 'shop', true);
+                    $template_path = wa()->getDataPath($template['tpl_path'], $template['public'], 'shop', true);
                     @unlink($template_path);
                 } else {
 
@@ -31,14 +32,14 @@ class shopOnestepPluginBackendSaveController extends waJsonController {
                     }
                     $post_template = $post_templates[$id];
 
-                    $template_path = wa()->getDataPath($template['tpl_path'], false, 'shop', true);
+                    $template_path = wa()->getDataPath($template['tpl_path'], $template['public'], 'shop', true);
                     if (!file_exists($template_path)) {
                         $template_path = wa()->getAppPath($template['tpl_path'], 'shop');
                     }
 
                     $template_content = file_get_contents($template_path);
                     if ($template_content != $post_template) {
-                        $template_path = wa()->getDataPath($template['tpl_path'], false, 'shop', true);
+                        $template_path = wa()->getDataPath($template['tpl_path'], $template['public'], 'shop', true);
 
                         $f = fopen($template_path, 'w');
                         if (!$f) {

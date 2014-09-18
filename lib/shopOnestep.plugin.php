@@ -26,6 +26,13 @@ class shopOnestepPlugin extends shopPlugin {
         if (!file_exists($checkout_path)) {
             $checkout_path = wa()->getAppPath('plugins/onestep/templates/checkout.html', 'shop');
         }
+        $cart_js_path = wa()->getDataPath('plugins/onestep/js/cart.js', true, 'shop', true);
+        $cart_js_url = wa()->getDataUrl('plugins/onestep/js/cart.js', true, 'shop');
+        if (!file_exists($cart_js_path)) {
+            $cart_js_path = wa()->getAppPath('plugins/onestep/js/cart.js', 'shop');
+            $cart_js_url = wa()->getAppStaticUrl() . 'plugins/onestep/js/cart.js';
+        }
+        $view->assign('cart_js_url', $cart_js_url);
         $view->assign('checkout_path', $checkout_path);
         $view->assign('settings', $settings);
         $html = $view->fetch($onestep_path);

@@ -3,8 +3,9 @@
 class shopOnestepPluginSettingsAction extends waViewAction {
 
     protected $templates = array(
-        'onestep' => array('name' => 'Главный шаблон', 'tpl_path' => 'plugins/onestep/templates/onestep.html'),
-        'checkout' => array('name' => 'Шаблон оформления заказа (checkout.html)', 'tpl_path' => 'plugins/onestep/templates/checkout.html'),
+        'onestep' => array('name' => 'Главный шаблон', 'tpl_path' => 'plugins/onestep/templates/onestep.html', 'public' => false),
+        'checkout' => array('name' => 'Шаблон оформления заказа (checkout.html)', 'tpl_path' => 'plugins/onestep/templates/checkout.html', 'public' => false),
+        'cart_js' => array('name' => 'cart.js', 'tpl_path' => 'plugins/onestep/js/cart.js', 'public' => true),
     );
     protected $plugin_id = array('shop', 'onestep');
 
@@ -14,7 +15,7 @@ class shopOnestepPluginSettingsAction extends waViewAction {
 
 
         foreach ($this->templates as &$template) {
-            $template['full_path'] = wa()->getDataPath($template['tpl_path'], false, 'shop', true);
+            $template['full_path'] = wa()->getDataPath($template['tpl_path'], $template['public'], 'shop', true);
             if (file_exists($template['full_path'])) {
                 $template['change_tpl'] = true;
             } else {
