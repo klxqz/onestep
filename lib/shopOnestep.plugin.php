@@ -4,6 +4,13 @@ class shopOnestepPlugin extends shopPlugin {
 
     protected static $steps = array();
 
+    public function frontendCheckout($param) {
+        if ($param['step'] != 'success' && wa()->getRouting()->getCurrentUrl() != 'cart/') {
+            $cart_url = wa()->getRouteUrl('shop/frontend/cart');
+            wa()->getResponse()->redirect($cart_url);
+        }
+    }
+
     public static function display() {
         $app_settings_model = new waAppSettingsModel();
         $settings = $app_settings_model->get(array('shop', 'onestep'));

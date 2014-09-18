@@ -9,6 +9,7 @@ return array(
     'shop_settings' => true,
     'frontend' => true,
     'handlers' => array(
+        'frontend_checkout' => 'frontendCheckout'
     ),
 );
 //EOF

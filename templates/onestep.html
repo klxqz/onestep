@@ -7,12 +7,12 @@
 
 {else}
     <!-- general welcome text -->
-    <div class="content right300px">
+    <div class="content">
 
         <h1>[`Shopping cart`]</h1>
 
         <form method="post">
-            <table class="table cart">
+            <table width="100%" class="table cart">
                 <!-- products -->
                 {foreach $cart.items as $item}
                     <tr data-id="{$item.id}">
