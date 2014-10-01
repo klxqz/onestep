@@ -69,7 +69,7 @@ class shopOnestepPlugin extends shopPlugin {
                 }
             }
         }
-
+        $checkout_tpls = array();
         foreach ($steps as $step_id => $step) {
             $steps[$step_id]['content'] = self::getStep($step_id)->display();
             /**
@@ -78,7 +78,10 @@ class shopOnestepPlugin extends shopPlugin {
              */
             $event_params = array('step' => $step_id);
             $view->assign('frontend_checkout', wa()->event('frontend_checkout', $event_params));
+            $step_tpl = $view->fetch('checkout.' . $step_id . '.html');
+            $checkout_tpls[$step_id] = $step_tpl;
         }
+        $view->assign('checkout_tpls', $checkout_tpls);
         $view->assign('checkout_steps', $steps);
     }
 
