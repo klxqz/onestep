@@ -1,3 +1,8 @@
+<style>
+    ul.menu-v li{
+        border-bottom:none;
+    }
+</style>
 <script type="text/javascript" src="{$cart_js_url}"></script>
 
 {if !$cart.count}
@@ -11,7 +16,7 @@
 
         <h1>[`Shopping cart`]</h1>
 
-        <form method="post">
+        <form method="post" class="onestep-cart-form">
             <table width="100%" class="table cart">
                 <!-- products -->
                 {foreach $cart.items as $item}

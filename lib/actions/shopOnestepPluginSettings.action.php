@@ -6,6 +6,11 @@ class shopOnestepPluginSettingsAction extends waViewAction {
         'onestep' => array('name' => 'Главный шаблон', 'tpl_path' => 'plugins/onestep/templates/onestep.html', 'public' => false),
         'checkout' => array('name' => 'Шаблон оформления заказа (checkout.html)', 'tpl_path' => 'plugins/onestep/templates/checkout.html', 'public' => false),
         'cart_js' => array('name' => 'cart.js', 'tpl_path' => 'plugins/onestep/js/cart.js', 'public' => true),
+        
+        'checkout.contactinfo' => array('name' => 'Шаблон оформления заказа - Контактная информация (checkout.contactinfo.html)', 'tpl_path' => 'plugins/onestep/templates/checkout.contactinfo.html', 'public' => false),
+        'checkout.shipping' => array('name' => 'Шаблон оформления заказа - Доставка (checkout.shipping.html)', 'tpl_path' => 'plugins/onestep/templates/checkout.shipping.html', 'public' => false),
+        'checkout.payment' => array('name' => 'Шаблон оформления заказа - Оплата (checkout.payment.html)', 'tpl_path' => 'plugins/onestep/templates/checkout.payment.html', 'public' => false),
+        'checkout.confirmation' => array('name' => 'Шаблон оформления заказа - Подтверждение (checkout.confirmation.html)', 'tpl_path' => 'plugins/onestep/templates/checkout.confirmation.html', 'public' => false),  
     );
     protected $plugin_id = array('shop', 'onestep');
 

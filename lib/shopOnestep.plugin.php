@@ -5,38 +5,39 @@ class shopOnestepPlugin extends shopPlugin {
     protected static $steps = array();
 
     public function frontendCheckout($param) {
-        if ($param['step'] != 'success' && wa()->getRouting()->getCurrentUrl() != 'cart/') {
+        if ($this->getSettings('status') && $param['step'] != 'success' && wa()->getRouting()->getCurrentUrl() != 'cart/') {
             $cart_url = wa()->getRouteUrl('shop/frontend/cart');
-            wa()->getResponse()->redirect($cart_url);
+            //wa()->getResponse()->redirect($cart_url);
         }
     }
 
     public static function display() {
         $app_settings_model = new waAppSettingsModel();
         $settings = $app_settings_model->get(array('shop', 'onestep'));
+        if ($settings['status']) {
+            self::checkout();
 
-        self::checkout();
-
-        $view = wa()->getView();
-        $onestep_path = wa()->getDataPath('plugins/onestep/templates/onestep.html', false, 'shop', true);
-        if (!file_exists($onestep_path)) {
-            $onestep_path = wa()->getAppPath('plugins/onestep/templates/onestep.html', 'shop');
+            $view = wa()->getView();
+            $onestep_path = wa()->getDataPath('plugins/onestep/templates/onestep.html', false, 'shop', true);
+            if (!file_exists($onestep_path)) {
+                $onestep_path = wa()->getAppPath('plugins/onestep/templates/onestep.html', 'shop');
+            }
+            $checkout_path = wa()->getDataPath('plugins/onestep/templates/checkout.html', false, 'shop', true);
+            if (!file_exists($checkout_path)) {
+                $checkout_path = wa()->getAppPath('plugins/onestep/templates/checkout.html', 'shop');
+            }
+            $cart_js_path = wa()->getDataPath('plugins/onestep/js/cart.js', true, 'shop', true);
+            $cart_js_url = wa()->getDataUrl('plugins/onestep/js/cart.js', true, 'shop');
+            if (!file_exists($cart_js_path)) {
+                $cart_js_path = wa()->getAppPath('plugins/onestep/js/cart.js', 'shop');
+                $cart_js_url = wa()->getAppStaticUrl() . 'plugins/onestep/js/cart.js';
+            }
+            $view->assign('cart_js_url', $cart_js_url);
+            $view->assign('checkout_path', $checkout_path);
+            $view->assign('settings', $settings);
+            $html = $view->fetch($onestep_path);
+            return $html;
         }
-        $checkout_path = wa()->getDataPath('plugins/onestep/templates/checkout.html', false, 'shop', true);
-        if (!file_exists($checkout_path)) {
-            $checkout_path = wa()->getAppPath('plugins/onestep/templates/checkout.html', 'shop');
-        }
-        $cart_js_path = wa()->getDataPath('plugins/onestep/js/cart.js', true, 'shop', true);
-        $cart_js_url = wa()->getDataUrl('plugins/onestep/js/cart.js', true, 'shop');
-        if (!file_exists($cart_js_path)) {
-            $cart_js_path = wa()->getAppPath('plugins/onestep/js/cart.js', 'shop');
-            $cart_js_url = wa()->getAppStaticUrl() . 'plugins/onestep/js/cart.js';
-        }
-        $view->assign('cart_js_url', $cart_js_url);
-        $view->assign('checkout_path', $checkout_path);
-        $view->assign('settings', $settings);
-        $html = $view->fetch($onestep_path);
-        return $html;
     }
 
     public static function checkout() {
@@ -78,13 +79,19 @@ class shopOnestepPlugin extends shopPlugin {
              */
             $event_params = array('step' => $step_id);
             $view->assign('frontend_checkout', wa()->event('frontend_checkout', $event_params));
-            $step_tpl = $view->fetch('checkout.' . $step_id . '.html');
+            
+            $step_tpl_path = wa()->getDataPath('plugins/onestep/templates/checkout.' . $step_id . '.html', false, 'shop', true);
+            if (!file_exists($step_tpl_path)) {
+                $step_tpl_path = wa()->getAppPath('plugins/onestep/templates/checkout.' . $step_id . '.html', 'shop');
+            }
+            
+            $step_tpl = $view->fetch($step_tpl_path);
             $checkout_tpls[$step_id] = $step_tpl;
         }
         $view->assign('checkout_tpls', $checkout_tpls);
         $view->assign('checkout_steps', $steps);
     }
-
+    
     protected function createOrder() {
         $checkout_data = wa()->getStorage()->get('shop/checkout');
 

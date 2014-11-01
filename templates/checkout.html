@@ -41,7 +41,7 @@
                         </div>
                     {/if}
 
-                    <div class="checkout-step-content" style="{if $wa->post('wa_auth_login')} display:none;{/if}">
+                    <div class="checkout-step-content">
 
                         {if in_array($step_id,['contactinfo', 'shipping', 'payment', 'confirmation'])}
                             {$checkout_tpls[$step_id]}
@@ -50,12 +50,10 @@
                         <div class="clear-both"></div>
 
                         {if $s@last}
-                            {if empty($error)}
-                                <div class="float-right">
-                                    <input name="confirmation" type="hidden" value="1" >
-                                    <input type="submit" class=" large bold" value="[`Place order`]">
-                                </div>
-                            {/if}
+                            <div class="float-right">
+                                <input name="confirmation" type="hidden" value="1" >
+                                <input type="submit" class=" large bold" value="[`Place order`]">
+                            </div>
                         {/if}
                         <div class="clear-both"></div>
                     </div>
@@ -78,26 +76,20 @@
             if (total == $('.cart-total').html()) {
                 return false;
             }
-
-            var cur_step = steps.shift();
-
-            var j = steps.indexOf(cur_step);
             for (var i in steps) {
-                if (i > j) {
-                    $('.step-' + steps[i] + ' h2 span.loading').html('<i class="icon16 loading"></i>');
-                    $('.step-' + steps[i]).find('input, select').attr('disabled', 'disabled');
-                }
+                $('.step-' + steps[i] + ' h2 span.loading').html('<i class="icon16 loading"></i>');
             }
+            $("form.checkout-form").find('[name=confirmation]').attr('disabled', 'disabled');
+            $("form.checkout-form").find('[type=submit]').attr('disabled', 'disabled');
 
-            $.post(window.location, function(response) {
-                var j = steps.indexOf(cur_step);
+            $.post(window.location, $("form.checkout-form").serialize() + $('.onestep-cart-form').serialize(), function(response) {
                 for (var i in steps) {
-                    if (i > j) {
-                        var step = steps[i];
-                        var html = $(response).find('.step-' + step).html();
-                        $('.step-' + step).html(html);
-                    }
+                    var step = steps[i];
+                    var html = $(response).find('.step-' + step).html();
+                    $('.step-' + step).html(html);
                 }
+                auth();
+                createUser();
             });
 
             $.post(check_url, function(response) {
@@ -112,6 +104,33 @@
 
             total = $('.cart-total').html();
         }, 500);
+
+        function createUser() {
+
+            var e = $('input[name="customer[email]"]');
+            if (e.length) {
+                e.on('keyup', function() {
+                    if ($("#create-user-div").is(':visible')) {
+                        $('#create-user-div input[name="login"]').val($(this).val());
+                    }
+                });
+                $('#create-user-div input[name="login"]').on('keyup', function() {
+                    e.val($(this).val());
+                })
+            }
+            $("#create-user").change(function() {
+                if ($(this).is(':checked')) {
+                    $("#create-user-div").show().find('input').removeAttr('disabled');
+                    var l = $(this).closest('form').find('input[name="customer[email]"]');
+                    if (l.length && l.val()) {
+                        $('#create-user-div input[name="login"]').val(l.val());
+                    }
+                } else {
+                    $("#create-user-div").hide().find('input').attr('disabled', 'disabled').val('');
+                }
+            }).change();
+
+        }
 
         function auth() {
             $("#login-form input").attr('disabled', 'disabled');
@@ -132,13 +151,14 @@
         }
 
         auth();
+        createUser();
 
         var steps = ['{implode("', '", array_keys($checkout_steps))}'];
 
-        $("form.checkout-form").on('change', 'input:not([name="user_type"],[name="login"],[name="password"],#create-user),select', function() {
+        $("form.checkout-form").on('change', 'input:not([name="user_type"],[name="login"],[name="password"],#create-user,[type="checkbox"]),select', function() {
             var f = $(this).closest("form.checkout-form");
             var cur_step = $(this).closest('.checkout-step').data('step');
-
+            //$('.checkout-step h2 span.loading').html('<i class="icon16 loading"></i>');
             var j = steps.indexOf(cur_step);
             for (var i in steps) {
                 if (i > j) {
@@ -147,7 +167,11 @@
                 }
             }
 
-            $.post(f.attr('action') || window.location, f.serialize(), function(response) {
+
+            $(f).find('[name=confirmation]').attr('disabled', 'disabled');
+            $(f).find('[type=submit]').attr('disabled', 'disabled');
+
+            $.post(f.attr('action') || window.location, f.serialize() + $('.onestep-cart-form').serialize(), function(response) {
                 var j = steps.indexOf(cur_step);
                 for (var i in steps) {
                     if (i > j) {
@@ -156,8 +180,11 @@
                         $('.step-' + step).html(html);
                     }
                 }
-
+                auth();
+                createUser();
             });
+            //$('.checkout-step').find('input, select').attr('disabled', 'disabled');
+
         });
 
         $("form.checkout-form").on('submit', function() {
@@ -166,12 +193,12 @@
                 return true;
             }
 
-            if (!$("form.checkout-form").find('input[name="shipping_id"]:checked').not(':disabled').length) {
+            if ($("form.checkout-form").find('input[name="shipping_id"]').length && !$("form.checkout-form").find('input[name="shipping_id"]:checked').not(':disabled').length) {
                 if (!f.find('em.errormsg').length) {
                     $('<em class="errormsg inline">' + ('[`Please select shipping option`]') + '</em>').insertBefore(f.find('input:submit:last'));
                 }
                 return false;
-            } else if (!$("form.checkout-form").find('input[name="payment_id"]:checked').not(':disabled').length) {
+            } else if ($("form.checkout-form").find('input[name="payment_id"]').length && !$("form.checkout-form").find('input[name="payment_id"]:checked').not(':disabled').length) {
                 if (!f.find('em.errormsg').length) {
                     $('<em class="errormsg inline">' + ('[`Please select payment option`]') + '</em>').insertBefore(f.find('input:submit:last'));
                 }

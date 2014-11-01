@@ -14,8 +14,21 @@
         {$wa->csrf()}
 
         {literal}
-        <p>{shopOnestepPlugin::display()} - Код хелпера вывода</p>
+            <p>{shopOnestepPlugin::display()} - Код хелпера вывода</p>
         {/literal}
+
+
+        <div class="field">
+            <div class="name">
+                Статус
+            </div>
+            <div class="value">
+                <select name="shop_onestep[status]">
+                    <option {if $settings.status == 1} selected="selected"{/if} value="1">Включен</option>
+                    <option {if $settings.status == 0} selected="selected"{/if} value="0">Выключен</option>
+                </select>
+            </div>
+        </div>
 
         <div class="field">
             <div class="name">
@@ -26,23 +39,30 @@
             </div>
         </div>
 
-        {foreach from=$templates key=key item=template}
-        <div class="field">
-            <div class="name">{$template.name}<br /><span class="hint">HTML + Smarty</span></div>
-            <div class="value no-shift">
-                <div id="s-editor-core-wrapper">
-                    <textarea id="sf-template-{$key}"  class="body" name="templates[{$key}]">{$template.template|escape}</textarea>
-                </div>
-            </div>
 
-            {if $template.change_tpl}
-            <div class="value">
-                <p class="gray"><i class="icon16 exclamation"></i>Внимание! Шаблон по умолчанию был изменен</p>
-                <input type="checkbox" name="reset_tpls[{$key}]" value="1"  /> - Сбросить изменения, использовать шаблон по умолчанию
-            </div>
-            {/if}
+        <div class="field">
+            <a class="edit-templates" href="javascript:void(0)"><i class="icon16 edit"></i>Изменить шаблоны</a>
+        </div>  
+
+        <div class="templates-block">
+            {foreach from=$templates key=key item=template}
+                <div class="field">
+                    <div class="name">{$template.name}<br /><span class="hint">HTML + Smarty</span></div>
+                    <div class="value no-shift">
+                        <div id="s-editor-core-wrapper">
+                            <textarea id="sf-template-{$key}"  class="body" name="templates[{$key}]">{$template.template|escape}</textarea>
+                        </div>
+                    </div>
+
+                    {if $template.change_tpl}
+                        <div class="value">
+                            <p class="gray"><i class="icon16 exclamation"></i>Внимание! Шаблон по умолчанию был изменен</p>
+                            <input type="checkbox" name="reset_tpls[{$key}]" value="1"  /> - Сбросить изменения, использовать шаблон по умолчанию
+                        </div>
+                    {/if}
+                </div>
+            {/foreach}
         </div>
-        {/foreach}
 
 
         <div class="field">
@@ -58,7 +78,9 @@
 <script type="text/javascript">
     $(function() {
 
-        var ids = ["sf-template-onestep", "sf-template-checkout", "sf-template-cart_js"];
+        
+
+        var ids = ["sf-template-onestep", "sf-template-checkout", "sf-template-cart_js", 'sf-template-checkout.contactinfo', 'sf-template-checkout.shipping', 'sf-template-checkout.payment', 'sf-template-checkout.confirmation'];
         for (var i = 0; i < ids.length; i++) {
 
             var c = CodeMirror.fromTextArea(document.getElementById(ids[i]), {
@@ -90,5 +112,10 @@
                 return false;
             });
         }
+        $('.templates-block').hide();
+        $('.edit-templates').click(function() {
+            $('.templates-block').show();
+        });
+        
     });
 </script>
