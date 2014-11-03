@@ -7,7 +7,7 @@ class shopOnestepPlugin extends shopPlugin {
     public function frontendCheckout($param) {
         if ($this->getSettings('status') && $param['step'] != 'success' && wa()->getRouting()->getCurrentUrl() != 'cart/') {
             $cart_url = wa()->getRouteUrl('shop/frontend/cart');
-            //wa()->getResponse()->redirect($cart_url);
+            wa()->getResponse()->redirect($cart_url);
         }
     }
 
