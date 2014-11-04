@@ -397,15 +397,9 @@
     $(document).ready(function() {
         if ($('.checkout-step .error:visible').length) {
             var destination = $('.checkout-step .error:visible').offset().top;
-            if ($.browser.safari) {
-                $('body').animate({
-                    scrollTop: destination
-                }, 1100);
-            } else {
-                $('html').animate({
-                    scrollTop: destination
-                }, 1100);
-            }
+            $('html,body').animate({
+                scrollTop: destination
+            }, 1100);
         }
     });
 </script>
