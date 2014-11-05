@@ -95,7 +95,7 @@
                     $("form.checkout-form").find('[name=confirmation]').attr('disabled', 'disabled');
                     $("form.checkout-form").find('[type=submit]').attr('disabled', 'disabled');
 
-                    $.post(window.location, $("form.checkout-form").serialize() + $('.onestep-cart-form').serialize(), function(response) {
+                    $.post(window.location, $("form.checkout-form").serialize() + '&' + $('.onestep-cart-form').serialize(), function(response) {
                         for (var i in self.options.steps) {
                             var step = self.options.steps[i];
                             var html = $(response).find('.step-' + step).html();
@@ -139,7 +139,7 @@
 
                     $(f).find('[name=confirmation]').attr('disabled', 'disabled');
                     $(f).find('[type=submit]').attr('disabled', 'disabled');
-                    $.post(f.attr('action') || window.location, f.serialize() + $('.onestep-cart-form').serialize(), function(response) {
+                    $.post(f.attr('action') || window.location, f.serialize() + '&' + $('.onestep-cart-form').serialize(), function(response) {
                         var j = self.options.steps.indexOf(cur_step);
                         for (var i in self.options.steps) {
                             if (i > j) {
