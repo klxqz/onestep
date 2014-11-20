@@ -15,9 +15,12 @@ class shopOnestepPlugin extends shopPlugin {
         $app_settings_model = new waAppSettingsModel();
         $settings = $app_settings_model->get(array('shop', 'onestep'));
         if ($settings['status']) {
+            $view = wa()->getView();
+            if (self::checkCart($cart)) {
+                $view->assign('cart', $cart);
+            }
             self::checkout();
 
-            $view = wa()->getView();
             $onestep_path = wa()->getDataPath('plugins/onestep/templates/onestep.html', false, 'shop', true);
             if (!file_exists($onestep_path)) {
                 $onestep_path = wa()->getAppPath('plugins/onestep/templates/onestep.html', 'shop');
@@ -38,6 +41,87 @@ class shopOnestepPlugin extends shopPlugin {
             $html = $view->fetch($onestep_path);
             return $html;
         }
+    }
+
+    public static function checkCart(&$cart = null) {
+        $error = false;
+        $cart = new shopCart();
+        $code = $cart->getCode();
+        $view = wa()->getView();
+        if (!wa()->getSetting('ignore_stock_count')) {
+            $cart_model = new shopCartItemsModel();
+            $sku_model = new shopProductSkusModel();
+            $product_model = new shopProductModel();
+
+            $items = $cart->items(false);
+
+            foreach ($items as &$item) {
+                if (!isset($item['product_id'])) {
+                    $sku = $sku_model->getById($item['sku_id']);
+                    $product = $product_model->getById($sku['product_id']);
+                } else {
+                    $product = $product_model->getById($item['product_id']);
+                    if (isset($item['sku_id'])) {
+                        $sku = $sku_model->getById($item['sku_id']);
+                    } else {
+                        if (isset($item['features'])) {
+                            $product_features_model = new shopProductFeaturesModel();
+                            $sku_id = $product_features_model->getSkuByFeatures($product['id'], $item['features']);
+                            if ($sku_id) {
+                                $sku = $sku_model->getById($sku_id);
+                            } else {
+                                $sku = null;
+                            }
+                        } else {
+                            $sku = $sku_model->getById($product['sku_id']);
+                            if (!$sku['available']) {
+                                $sku = $sku_model->getByField(array('product_id' => $product['id'], 'available' => 1));
+                            }
+
+                            if (!$sku) {
+                                $item['error'] = _w('This product is not available for purchase');
+                                $error = true;
+                            }
+                        }
+                    }
+                }
+
+                $quantity = $item['quantity'];
+                $c = $cart_model->countSku($code, $sku['id']);
+                if ($sku['count'] !== null && $c + $quantity > $sku['count']) {
+                    $quantity = $sku['count'] - $c;
+                    $name = $product['name'] . ($sku['name'] ? ' (' . $sku['name'] . ')' : '');
+                    if ($quantity < 0) {
+                        $item['error'] = sprintf(_w('Only %d pcs of %s are available, and you already have all of them in your shopping cart.'), $sku['count'], $name);
+                        $error = true;
+                    }
+                }
+            }
+            unset($item);
+            foreach ($items as $item_id => $item) {
+                $price = shop_currency($item['price'] * $item['quantity'], $item['currency'], null, false);
+                if (isset($item['services'])) {
+                    foreach ($item['services'] as $s) {
+                        if (!empty($s['id'])) {
+                            if (isset($s['variants'])) {
+                                $price += shop_currency($s['variants'][$s['variant_id']]['price'] * $item['quantity'], $s['currency'], null, false);
+                            } else {
+                                $price += shop_currency($s['price'] * $item['quantity'], $s['currency'], null, false);
+                            }
+                        }
+                    }
+                }
+                $items[$item_id]['full_price'] = $price;
+            }
+
+
+            $cart = array(
+                'items' => $items,
+                'total' => $cart->total(false),
+                'count' => $cart->count()
+            );
+        }
+        return $error;
     }
 
     public static function checkout() {
@@ -63,7 +147,7 @@ class shopOnestepPlugin extends shopPlugin {
                 }
 
 
-                if (waRequest::post('confirmation') && !$error) {
+                if (waRequest::post('confirmation') && !$error && !self::checkCart()) {
                     if (self::createOrder()) {
                         wa()->getResponse()->redirect(wa()->getRouteUrl('/frontend/checkout', array('step' => 'success')));
                     }
@@ -79,19 +163,19 @@ class shopOnestepPlugin extends shopPlugin {
              */
             $event_params = array('step' => $step_id);
             $view->assign('frontend_checkout', wa()->event('frontend_checkout', $event_params));
-            
+
             $step_tpl_path = wa()->getDataPath('plugins/onestep/templates/checkout.' . $step_id . '.html', false, 'shop', true);
             if (!file_exists($step_tpl_path)) {
                 $step_tpl_path = wa()->getAppPath('plugins/onestep/templates/checkout.' . $step_id . '.html', 'shop');
             }
-            
+
             $step_tpl = $view->fetch($step_tpl_path);
             $checkout_tpls[$step_id] = $step_tpl;
         }
         $view->assign('checkout_tpls', $checkout_tpls);
         $view->assign('checkout_steps', $steps);
     }
-    
+
     protected function createOrder() {
         $checkout_data = wa()->getStorage()->get('shop/checkout');
 
@@ -223,7 +307,7 @@ class shopOnestepPlugin extends shopPlugin {
 
     protected static function getStep($step_id) {
         if (!isset(self::$steps[$step_id])) {
-            $class_name = 'shopCheckout' . ucfirst($step_id);
+            $class_name = 'shopOnestepCheckout' . ucfirst($step_id);
             self::$steps[$step_id] = new $class_name();
         }
         return self::$steps[$step_id];

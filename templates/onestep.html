@@ -46,7 +46,13 @@
 
                             </div>
                         {/if}
-                        {if !empty($item.error)}<script>alert({json_encode($item.error)});</script>{/if}
+                        {if !empty($item.error)}
+                            <script>
+                                $(function(){
+                                    alert({json_encode($item.error)});
+                                });
+                            </script>
+                        {/if}
                     </td>
                     <td class="align-center nowrap"><span class="gray">&times;</span> <input type="text" name="quantity[{$item.id}]" value="{$item.quantity}" class="qty{if !empty($item.error)} error{/if}"></td>
                     <td class="align-center item-total nowrap">{shop_currency_html($item.full_price, true)}</td>

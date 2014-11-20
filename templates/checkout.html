@@ -6,6 +6,9 @@
 
     {if isset($checkout_steps)}
         <form class="checkout-form" method="post" action="">
+            {if shopDiscounts::isEnabled('coupons')}
+                <input type="hidden" name="coupon_code" value="{$coupon_code|escape}">
+            {/if}
             {foreach $checkout_steps as $step_id => $s}
 
                 <div class="checkout-step step-{$step_id}" data-step="{$step_id}">
@@ -73,15 +76,22 @@
             options: {},
             init: function(options) {
                 this.options = options;
-
                 this.formChange();
                 this.formSubmit();
                 this.checkMinOrder();
-
                 this.initContactinfo();
                 this.initShipping();
                 this.initPayment();
                 this.initConfirmation();
+                this.setFirstMethod();
+            },
+            setFirstMethod: function() {
+                if ($("form.checkout-form").find('input[name="shipping_id"]').length && !$("form.checkout-form").find('input[name="shipping_id"]:checked').not(':disabled').length) {
+                    $("form.checkout-form").find('input[name="shipping_id"]:first').click();
+                }
+                if ($("form.checkout-form").find('input[name="payment_id"]').length && !$("form.checkout-form").find('input[name="payment_id"]:checked').not(':disabled').length) {
+                    $("form.checkout-form").find('input[name="payment_id"]:first').click();
+                }
             },
             checkMinOrder: function() {
                 var self = this;
@@ -94,7 +104,6 @@
                     }
                     $("form.checkout-form").find('[name=confirmation]').attr('disabled', 'disabled');
                     $("form.checkout-form").find('[type=submit]').attr('disabled', 'disabled');
-
                     $.post(window.location, $("form.checkout-form").serialize() + '&' + $('.onestep-cart-form').serialize(), function(response) {
                         for (var i in self.options.steps) {
                             var step = self.options.steps[i];
@@ -116,7 +125,6 @@
                             }
                         }
                     });
-
                     $.post(self.options.check_url, function(response) {
                         if (response.data.check) {
                             $('.checkout').show();
@@ -126,7 +134,6 @@
                             $('.onestep_min_summ').show();
                         }
                     }, 'json');
-
                     self.options.total = $('.cart-total').html();
                 }, 500);
             },
@@ -136,7 +143,6 @@
                     var f = $(this).closest("form.checkout-form");
                     var cur_step = $(this).closest('.checkout-step').data('step');
                     var j = self.options.steps.indexOf(cur_step);
-
                     $(f).find('[name=confirmation]').attr('disabled', 'disabled');
                     $(f).find('[type=submit]').attr('disabled', 'disabled');
                     $.post(f.attr('action') || window.location, f.serialize() + '&' + $('.onestep-cart-form').serialize(), function(response) {
@@ -162,6 +168,8 @@
                                 }
                             }
                         }
+                        $("form.checkout-form").find('[name=confirmation]').removeAttr('disabled');
+                        $("form.checkout-form").find('[type=submit]').removeAttr('disabled');
                     });
                     for (var i in self.options.steps) {
                         if (i > j) {
@@ -203,9 +211,11 @@
                 this.checkoutOptions();
                 this.addressChange();
                 this.shippingRates();
+                this.setFirstMethod();
             },
             initPayment: function() {
                 this.paymentOptions();
+                this.setFirstMethod();
             },
             initConfirmation: function() {
 
