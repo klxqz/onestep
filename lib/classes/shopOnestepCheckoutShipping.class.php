@@ -1,11 +1,17 @@
 <?php
 
-class shopOnestepCheckoutShipping extends shopOnestepCheckout
-{
+class shopOnestepCheckoutShipping extends shopOnestepCheckout {
+
     protected $step_id = 'shipping';
 
-    public function display()
-    {
+    public function initDefault() {
+        
+        $session_shiping = $this->getSessionData('shipping');
+        if (!empty($session_shiping)) {
+            return false;
+        }
+
+
         $plugin_model = new shopPluginModel();
         if (waRequest::param('shipping_id') && is_array(waRequest::param('shipping_id'))) {
             $methods = $plugin_model->getById(waRequest::param('shipping_id'));
@@ -33,7 +39,143 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout
         $settings = wa('shop')->getConfig()->getCheckoutSettings();
         $address_form = !isset($settings['contactinfo']) || !isset($settings['contactinfo']['fields']['address.shipping']);
         if (!isset($settings['contactinfo']) ||
-            (!isset($settings['contactinfo']['fields']['address.shipping']) && !isset($settings['contactinfo']['fields']['address']))) {
+                (!isset($settings['contactinfo']['fields']['address.shipping']) && !isset($settings['contactinfo']['fields']['address']))) {
+            $settings = wa('shop')->getConfig()->getCheckoutSettings(true);
+        }
+        if (!$address) {
+            $shipping_address = array();
+            $address_form = true;
+            if ($settings['contactinfo']['fields']['address']) {
+                foreach ($settings['contactinfo']['fields']['address']['fields'] as $k => $f) {
+                    if (!empty($f['value'])) {
+                        $shipping_address[$k] = $f['value'];
+                    }
+                }
+            }
+        } else {
+            $shipping_address = $address;
+        }
+        
+        $selected_shipping = $this->getSessionData('shipping', array());
+
+        $dimension = shopDimension::getInstance()->getDimension('weight');
+        $currencies = wa('shop')->getConfig()->getCurrencies();
+        foreach ($methods as $method_id => $m) {
+            $plugin = shopShipping::getPlugin($m['plugin'], $m['id']);
+            $plugin_info = $plugin->info($m['plugin']);
+            $m['icon'] = $plugin_info['icon'];
+            $m['img'] = $plugin_info['img'];
+            $m['currency'] = $plugin->allowedCurrency();
+            $weight_unit = $plugin->allowedWeightUnit();
+            if ($weight_unit != $dimension['base_unit']) {
+                $shipping_items = array();
+                foreach ($items as $item_id => $item) {
+                    if ($item['weight']) {
+                        $item['weight'] = $item['weight'] / $dimension['units'][$weight_unit]['multiplier'];
+                    }
+                    $shipping_items[$item_id] = $item;
+                }
+            } else {
+                $shipping_items = $items;
+            }
+            $m['external'] = ($selected_shipping && $selected_shipping['id'] == $m['id']) ? 0 : $plugin->getProperties('external');
+            if ($m['external']) {
+                $m['rates'] = array();
+            } else {
+                $m['rates'] = $plugin->getRates($shipping_items, $shipping_address, array('total_price' => $total));
+            }
+            if (is_array($m['rates'])) {
+                if (!isset($currencies[$m['currency']])) {
+                    $m['rate'] = 0;
+                    $m['error'] = sprintf(_w('Shipping rate was not calculated because required currency %s is not defined in your store settings.'), $m['currency']);
+                    $methods[$method_id] = $m;
+                    continue;
+                }
+                foreach ($m['rates'] as &$r) {
+                    if (is_array($r['rate'])) {
+                        $r['rate'] = max($r['rate']);
+                    }
+                }
+                if ($m['rates']) {
+                    if (!empty($selected_shipping['rate_id']) && isset($m['rates'][$selected_shipping['rate_id']])) {
+                        $rate = $m['rates'][$selected_shipping['rate_id']];
+                    } else {
+                        $rate = reset($m['rates']);
+                    }
+                    $m['rate'] = $rate['rate'];
+                    $m['est_delivery'] = isset($rate['est_delivery']) ? $rate['est_delivery'] : '';
+                    if (!empty($rate['comment'])) {
+                        $m['comment'] = $rate['comment'];
+                    }
+                } else {
+                    $m['rates'] = array();
+                    $m['rate'] = null;
+                }
+            } elseif (is_string($m['rates'])) {
+                if ($address) {
+                    $m['error'] = $m['rates'];
+                } else {
+                    $m['rates'] = array();
+                    $m['rate'] = null;
+                }
+            } else {
+                unset($methods[$method_id]);
+                continue;
+            }
+
+
+            $methods[$method_id] = $m;
+        }
+
+
+
+        $default_method = '';
+        foreach ($methods as $m) {
+            if (empty($m['error'])) {
+                $default_method = $m;
+                break;
+            }
+        }
+
+        $rates = array_keys($default_method['rates']);
+
+        $this->setSessionData('shipping', array(
+            'id' => $default_method['id'],
+            'rate_id' => isset($rates[0]) ? $rates[0] : '',
+            'name' => $default_method['name'],
+            'plugin' => $default_method['plugin']
+        ));
+    }
+
+    public function display() {
+        $plugin_model = new shopPluginModel();
+        if (waRequest::param('shipping_id') && is_array(waRequest::param('shipping_id'))) {
+            $methods = $plugin_model->getById(waRequest::param('shipping_id'));
+        } else {
+            $methods = $plugin_model->listPlugins('shipping');
+        }
+
+        $address = $this->getAddress();
+        $empty = true;
+        foreach ($address as $v) {
+            if ($v) {
+                $empty = false;
+                break;
+            }
+        }
+        if ($empty) {
+            $address = array();
+        }
+        $items = $this->getItems();
+
+        $cart = new shopCart();
+        $total = $cart->total();
+
+
+        $settings = wa('shop')->getConfig()->getCheckoutSettings();
+        $address_form = !isset($settings['contactinfo']) || !isset($settings['contactinfo']['fields']['address.shipping']);
+        if (!isset($settings['contactinfo']) ||
+                (!isset($settings['contactinfo']['fields']['address.shipping']) && !isset($settings['contactinfo']['fields']['address']))) {
             $settings = wa('shop')->getConfig()->getCheckoutSettings(true);
         }
         if (!$address) {
@@ -60,7 +202,7 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout
         } else {
             $selected_shipping = $this->getSessionData('shipping', array());
         }
-
+        
         $dimension = shopDimension::getInstance()->getDimension('weight');
         $currencies = wa('shop')->getConfig()->getCurrencies();
         foreach ($methods as $method_id => $m) {
@@ -81,7 +223,7 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout
             } else {
                 $shipping_items = $items;
             }
-            $m['external'] = ($selected_shipping && $selected_shipping['id'] == $m['id']) ? 0 :$plugin->getProperties('external');
+            $m['external'] = ($selected_shipping && $selected_shipping['id'] == $m['id']) ? 0 : $plugin->getProperties('external');
             if ($m['external']) {
                 $m['rates'] = array();
             } else {
@@ -129,7 +271,7 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout
             $custom_fields = $this->getCustomFields($method_id, $plugin);
             $custom_html = '';
             foreach ($custom_fields as $c) {
-                $custom_html .= '<div class="wa-field">'.$c.'</div>';
+                $custom_html .= '<div class="wa-field">' . $c . '</div>';
             }
             if ($custom_html) {
                 $m['custom_html'] = $custom_html;
@@ -155,9 +297,9 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout
             }
         }
         $view->assign('shipping', $selected_shipping ? $selected_shipping : array('id' => $default_method, 'rate_id' => ''));
-        
+
         $checkout_flow = new shopCheckoutFlowModel();
-        $step_number = shopCheckout::getStepNumber('shipping');
+        $step_number = shopOnestepCheckout::getStepNumber('shipping');
         // IF no errors 
         $checkout_flow->add(array(
             'step' => $step_number
@@ -167,17 +309,15 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout
 //            'step' => $step_number,
 //            'description' => ERROR MESSAGE HERE
 //        ));
-        
     }
 
-    public function getAddressForm($method_id, waShipping $plugin, $config, $contact_address, $address_form)
-    {
+    public function getAddressForm($method_id, waShipping $plugin, $config, $contact_address, $address_form) {
         $config_address = isset($config['contactinfo']['fields']['address.shipping']) ?
-            $config['contactinfo']['fields']['address.shipping'] :
-            (isset($config['contactinfo']['fields']['address']) ? $config['contactinfo']['fields']['address'] : array());
+                $config['contactinfo']['fields']['address.shipping'] :
+                (isset($config['contactinfo']['fields']['address']) ? $config['contactinfo']['fields']['address'] : array());
 
         $address_fields = $plugin->requestedAddressFields();
-        $disabled_only = $address_fields === array() ? false: true;
+        $disabled_only = $address_fields === array() ? false : true;
         if ($address_fields === false || $address_fields === null) {
             return false;
         }
@@ -198,7 +338,7 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout
                         $fields[$f->getId()] = array();
                     }
                 } else {
-                    $fields =  $config_address['fields'];
+                    $fields = $config_address['fields'];
                 }
                 foreach ($allowed[0] as $k => $v) {
                     if (is_array($v)) {
@@ -232,7 +372,7 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout
                             unset($fields[$f_id]);
                         }
                     }
-                    foreach ($address_fields as $f_id  => $f) {
+                    foreach ($address_fields as $f_id => $f) {
                         if (!isset($fields[$f_id])) {
                             $fields[$f_id] = $f;
                         }
@@ -276,14 +416,13 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout
                     }
                 }
             }
-            return waContactForm::loadConfig(array('address.shipping' => $address), array('namespace' => 'customer_'.$method_id));
+            return waContactForm::loadConfig(array('address.shipping' => $address), array('namespace' => 'customer_' . $method_id));
         } else {
             return null;
         }
     }
 
-    public function getItems($weight_unit = null)
-    {
+    public function getItems($weight_unit = null) {
         $items = array();
         $cart = new shopCart();
         $cart_items = $cart->items();
@@ -328,8 +467,7 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout
         return $items;
     }
 
-    public function getRate($id = null, $rate_id = null, $contact = null)
-    {
+    public function getRate($id = null, $rate_id = null, $contact = null) {
         if (!$id) {
             $shipping = $this->getSessionData('shipping');
             if (!$shipping) {
@@ -370,7 +508,7 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout
             $result['rate'] = shop_currency($result['rate'], $currency, $currrent_currency, false);
         }
         $result['plugin'] = $plugin->getId();
-        $result['name'] = $plugin_info['name'].(!empty($result['name']) ? ' ('.$result['name'].')': '');
+        $result['name'] = $plugin_info['name'] . (!empty($result['name']) ? ' (' . $result['name'] . ')' : '');
         return $result;
     }
 
@@ -378,8 +516,7 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout
      * @param waContact $contact
      * @return array
      */
-    public function getAddress($contact = null)
-    {
+    public function getAddress($contact = null) {
         if ($contact === null) {
             $contact = $this->getContact();
         }
@@ -394,21 +531,18 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout
         }
     }
 
-    public function validate()
-    {
-
-
+    public function validate() {
+        
     }
 
-    public function execute()
-    {
+    public function execute() {
         if ($shipping_id = waRequest::post('shipping_id')) {
 
-            if ($data = waRequest::post('customer_'.$shipping_id)) {
+            if ($data = waRequest::post('customer_' . $shipping_id)) {
 
                 $settings = wa('shop')->getConfig()->getCheckoutSettings();
                 if (!isset($settings['contactinfo']) ||
-                    (!isset($settings['contactinfo']['fields']['address.shipping']) && !isset($settings['contactinfo']['fields']['address']))) {
+                        (!isset($settings['contactinfo']['fields']['address.shipping']) && !isset($settings['contactinfo']['fields']['address']))) {
                     $settings = wa('shop')->getConfig()->getCheckoutSettings(true);
                 }
                 $plugin = shopShipping::getPlugin(null, $shipping_id);
@@ -461,7 +595,7 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout
             if ($comment = waRequest::post('comment')) {
                 $this->setSessionData('comment', $comment);
             }
-            if ($shipping_params = waRequest::post('shipping_'.$shipping_id)) {
+            if ($shipping_params = waRequest::post('shipping_' . $shipping_id)) {
                 $params = $this->getSessionData('params', array());
                 $params['shipping'] = $shipping_params;
                 $this->setSessionData('params', $params);
@@ -472,26 +606,25 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout
         }
     }
 
-    public function getOptions($config)
-    {
+    public function getOptions($config) {
         $html = '
 <div class="field">
     <div class="name">
-        <p>'._w('Prompt for address').'</p>
+        <p>' . _w('Prompt for address') . '</p>
     </div>
     <div class="value">
-        <p>'._w('During the “Shipping” checkout step, when customer selects a preferred shipping option but shipping address was not yet entered, instantly prompt customer to provide:').'</p>
+        <p>' . _w('During the “Shipping” checkout step, when customer selects a preferred shipping option but shipping address was not yet entered, instantly prompt customer to provide:') . '</p>
     </div>
     <div class="value no-shift">
-        <label><input '.(empty($config['prompt_type']) ? 'checked' : '').' name="config[prompt_type]" type="radio" value="0"> '._w('All address fields required by the selected shipping option').'</label>
-        <p class="hint">'._w('Prompt for all address fields according to the selected shipping option implementation. If you use this option and have “Shipping” prior to “Contact info” in the checkout step order, it is advisable to hide (disable) shipping address form on the “Contact Info” checkout step to avoid asking for address twice.').'</p>
+        <label><input ' . (empty($config['prompt_type']) ? 'checked' : '') . ' name="config[prompt_type]" type="radio" value="0"> ' . _w('All address fields required by the selected shipping option') . '</label>
+        <p class="hint">' . _w('Prompt for all address fields according to the selected shipping option implementation. If you use this option and have “Shipping” prior to “Contact info” in the checkout step order, it is advisable to hide (disable) shipping address form on the “Contact Info” checkout step to avoid asking for address twice.') . '</p>
     </div>
     <div class="value no-shift">
-        <label><input '.(!empty($config['prompt_type']) ? 'checked' : '').' name="config[prompt_type]" type="radio" value="1"> '._w('Only fields required for shipping rate estimation').'</label>
-        <p class="hint">'._w('Prompt for fields required for shipping rate and delivery date estimation only (shipping option implementation declares the list of such fields). This is a suitable setup option if you have “Shipping” prior to “Contact info” in the checkout step order setup.').'</p>
+        <label><input ' . (!empty($config['prompt_type']) ? 'checked' : '') . ' name="config[prompt_type]" type="radio" value="1"> ' . _w('Only fields required for shipping rate estimation') . '</label>
+        <p class="hint">' . _w('Prompt for fields required for shipping rate and delivery date estimation only (shipping option implementation declares the list of such fields). This is a suitable setup option if you have “Shipping” prior to “Contact info” in the checkout step order setup.') . '</p>
     </div>
     <div class="value no-shift">
-        <p class="hint italic">'._w('This list of address fields is configured in the “Contact info” step settings.').'<br></p>
+        <p class="hint italic">' . _w('This list of address fields is configured in the “Contact info” step settings.') . '<br></p>
     </div>
 </div>
     ';
@@ -499,14 +632,12 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout
         return $html;
     }
 
-
-    protected function getCustomFields($id, waShipping $plugin)
-    {
+    protected function getCustomFields($id, waShipping $plugin) {
         $contact = $this->getContact();
         $order_params = $this->getSessionData('params', array());
         $shipping_params = isset($order_params['shipping']) ? $order_params['shipping'] : array();
         foreach ($shipping_params as $k => $v) {
-            $order_params['shipping_params_'.$k] = $v;
+            $order_params['shipping_params_' . $k] = $v;
         }
         $order = new waOrder(array('contact' => $contact,
             'contact_id' => $contact ? $contact->getId() : null,
@@ -518,7 +649,7 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout
         }
 
         $params = array();
-        $params['namespace'] = 'shipping_'.$id;
+        $params['namespace'] = 'shipping_' . $id;
         $params['title_wrapper'] = '%s';
         $params['description_wrapper'] = '<br><span class="hint">%s</span>';
         $params['control_wrapper'] = '<div class="wa-name">%s</div><div class="wa-value">%s %s</div>';
@@ -537,6 +668,5 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout
 
         return $controls;
     }
-
 
 }

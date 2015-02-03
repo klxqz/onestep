@@ -3,6 +3,10 @@
 class shopOnestepCheckoutConfirmation extends shopOnestepCheckout
 {
     protected $step_id = 'confirmation';
+    
+    public function initDefault() {
+        
+    }
 
     public function display()
     {
@@ -52,9 +56,9 @@ class shopOnestepCheckoutConfirmation extends shopOnestepCheckout
                 $tax_included += $t['sum_included'];
             }
         }
-
+        
         if (!isset($order['shipping'])) {
-            $shipping_step = new shopCheckoutShipping();
+            $shipping_step = new shopOnestepCheckoutShipping();
             $rate = $shipping_step->getRate();
             if ($rate) {
                 $order['shipping'] = $rate['rate'];
@@ -99,7 +103,7 @@ class shopOnestepCheckoutConfirmation extends shopOnestepCheckout
         ));
 
         $checkout_flow = new shopCheckoutFlowModel();
-        $step_number = shopCheckout::getStepNumber('confirmation');
+        $step_number = shopOnestepCheckout::getStepNumber('confirmation');
         // IF no errors
         $checkout_flow->add(array(
             'step' => $step_number

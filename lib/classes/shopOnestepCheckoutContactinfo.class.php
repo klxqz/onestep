@@ -8,6 +8,10 @@ class shopOnestepCheckoutContactinfo extends shopOnestepCheckout {
      * @var waContactForm
      */
     protected $form;
+    
+    public function initDefault() {
+        
+    }
 
     public function display() {
         if (!$this->form) {
@@ -32,7 +36,7 @@ class shopOnestepCheckoutContactinfo extends shopOnestepCheckout {
         }
 
         $checkout_flow = new shopCheckoutFlowModel();
-        $step_number = shopCheckout::getStepNumber('contactinfo');
+        $step_number = shopOnestepCheckout::getStepNumber('contactinfo');
         // IF no errors 
         $checkout_flow->add(array(
             'step' => $step_number
@@ -68,14 +72,12 @@ class shopOnestepCheckoutContactinfo extends shopOnestepCheckout {
 
 
         $this->form = shopHelper::getCustomerForm();
-        if (!$this->form->isValid($contact)) {
-            return false;
-        }
+
 
 
 
         if ($shipping = $this->getSessionData('shipping') && !waRequest::post('ignore_shipping_error')) {
-            $shipping_step = new shopCheckoutShipping();
+            $shipping_step = new shopOnestepCheckoutShipping();
             $rate = $shipping_step->getRate($shipping['id'], isset($shipping['rate_id']) ? $shipping['rate_id'] : null, $contact);
             if (!$rate || is_string($rate)) {
                 // remove selected shipping method
@@ -132,6 +134,10 @@ class shopOnestepCheckoutContactinfo extends shopOnestepCheckout {
 
         if ($comment = waRequest::post('comment')) {
             $this->setSessionData('comment', $comment);
+        }
+
+        if (!$this->form->isValid($contact)) {
+            return false;
         }
 
         return true;

@@ -1,11 +1,16 @@
 <?php
 
-class shopOnestepCheckoutPayment extends shopOnestepCheckout
-{
+class shopOnestepCheckoutPayment extends shopOnestepCheckout {
+
     protected $step_id = 'payment';
 
-    public function display()
-    {
+    public function initDefault() {
+
+        $session_payment = $this->getSessionData('payment');
+        if (!empty($session_payment)) {
+            return false;
+        }
+
         $plugin_model = new shopPluginModel();
 
         if (waRequest::param('payment_id') && is_array(waRequest::param('payment_id'))) {
@@ -24,7 +29,51 @@ class shopOnestepCheckoutPayment extends shopOnestepCheckout
         $currencies = wa('shop')->getConfig()->getCurrencies();
         $selected = null;
         foreach ($methods as $key => $m) {
-            $method_id  = $m['id'];
+            $method_id = $m['id'];
+            if (in_array($method_id, $disabled)) {
+                unset($methods[$key]);
+                continue;
+            }
+            $plugin = shopPayment::getPlugin($m['plugin'], $m['id']);
+            $plugin_info = $plugin->info($m['plugin']);
+            $methods[$key]['icon'] = $plugin_info['icon'];
+            $custom_fields = $this->getCustomFields($method_id, $plugin);
+
+            $allowed_currencies = $plugin->allowedCurrency();
+            if ($allowed_currencies !== true) {
+                $allowed_currencies = (array) $allowed_currencies;
+                if (!array_intersect($allowed_currencies, array_keys($currencies))) {
+                    $methods[$key]['error'] = sprintf(_w('Payment procedure cannot be processed because required currency %s is not defined in your store settings.'), implode(', ', $allowed_currencies));
+                }
+            }
+            if (!$selected && empty($methods[$key]['error'])) {
+                $selected = $method_id;
+            }
+        }
+
+        $this->setSessionData('payment', $selected);
+    }
+
+    public function display() {
+        $plugin_model = new shopPluginModel();
+
+        if (waRequest::param('payment_id') && is_array(waRequest::param('payment_id'))) {
+            $methods = $plugin_model->getById(waRequest::param('payment_id'));
+        } else {
+            $methods = $plugin_model->listPlugins('payment');
+        }
+
+        $shipping = $this->getSessionData('shipping');
+        if ($shipping) {
+            $disabled = shopHelper::getDisabledMethods('payment', $shipping['id']);
+        } else {
+            $disabled = array();
+        }
+
+        $currencies = wa('shop')->getConfig()->getCurrencies();
+        $selected = null;
+        foreach ($methods as $key => $m) {
+            $method_id = $m['id'];
             if (in_array($method_id, $disabled)) {
                 unset($methods[$key]);
                 continue;
@@ -35,7 +84,7 @@ class shopOnestepCheckoutPayment extends shopOnestepCheckout
             $custom_fields = $this->getCustomFields($method_id, $plugin);
             $custom_html = '';
             foreach ($custom_fields as $c) {
-                $custom_html .= '<div class="wa-field">'.$c.'</div>';
+                $custom_html .= '<div class="wa-field">' . $c . '</div>';
             }
             $methods[$key]['custom_html'] = $custom_html;
             $allowed_currencies = $plugin->allowedCurrency();
@@ -53,9 +102,9 @@ class shopOnestepCheckoutPayment extends shopOnestepCheckout
         $view = wa()->getView();
         $view->assign('checkout_payment_methods', $methods);
         $view->assign('payment_id', $this->getSessionData('payment', $selected));
-        
+
         $checkout_flow = new shopCheckoutFlowModel();
-        $step_number = shopCheckout::getStepNumber('payment');
+        $step_number = shopOnestepCheckout::getStepNumber('payment');
         // IF no errors 
         $checkout_flow->add(array(
             'step' => $step_number
@@ -65,16 +114,14 @@ class shopOnestepCheckoutPayment extends shopOnestepCheckout
 //            'step' => $step_number,
 //            'description' => ERROR MESSAGE HERE
 //        ));
-        
     }
 
-    protected function getCustomFields($id, waPayment $plugin)
-    {
+    protected function getCustomFields($id, waPayment $plugin) {
         $contact = $this->getContact();
         $order_params = $this->getSessionData('params', array());
         $payment_params = isset($order_params['payment']) ? $order_params['payment'] : array();
         foreach ($payment_params as $k => $v) {
-            $order_params['payment_params_'.$k] = $v;
+            $order_params['payment_params_' . $k] = $v;
         }
         $order = new waOrder(array('contact' => $contact,
             'contact_id' => $contact ? $contact->getId() : null,
@@ -86,7 +133,7 @@ class shopOnestepCheckoutPayment extends shopOnestepCheckout
         }
 
         $params = array();
-        $params['namespace'] = 'payment_'.$id;
+        $params['namespace'] = 'payment_' . $id;
         $params['title_wrapper'] = '%s';
         $params['description_wrapper'] = '<br><span class="hint">%s</span>';
         $params['control_wrapper'] = '<div class="wa-name">%s</div><div class="wa-value">%s %s</div>';
@@ -105,20 +152,17 @@ class shopOnestepCheckoutPayment extends shopOnestepCheckout
         return $controls;
     }
 
-
-    public function validate()
-    {
-
+    public function validate() {
+        
     }
 
-    public function execute()
-    {
+    public function execute() {
         if ($payment_id = waRequest::post('payment_id')) {
             $this->setSessionData('payment', $payment_id);
             if ($comment = waRequest::post('comment')) {
                 $this->setSessionData('comment', $comment);
             }
-            if ($payment_params = waRequest::post('payment_'.$payment_id)) {
+            if ($payment_params = waRequest::post('payment_' . $payment_id)) {
                 $params = $this->getSessionData('params', array());
                 $params['payment'] = $payment_params;
                 $this->setSessionData('params', $params);
@@ -127,7 +171,6 @@ class shopOnestepCheckoutPayment extends shopOnestepCheckout
         } else {
             return false;
         }
-
     }
-    
+
 }

@@ -1,0 +1,187 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: shop/plugins/onestep\n"
+"POT-Creation-Date: 2013-03-10 12:19+0400\n"
+"PO-Revision-Date: \n"
+"Last-Translator: shop/plugins/onestep\n"
+"Language-Team: shop/plugins/onestep\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n"
+"%100)<10)||((n%100)>=20)))?(1):2));\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-Basepath: .\n"
+"X-Generator: Poedit 1.7.4\n"
+"Language: ru_RU\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: .\n"
+
+msgid "Your shopping cart is empty."
+msgstr "Ваша корзина пуста."
+
+#: /wa-apps/shop/themes/default/cart.html:8
+msgid "Better together"
+msgstr "Рекомендуем!"
+
+#: /wa-apps/shop/themes/default/cart.html:15
+msgid "Shopping cart"
+msgstr "Корзина"
+
+#: /wa-apps/shop/themes/default/cart.html:50
+msgid "Remove from cart"
+msgstr "Удалить из корзины"
+
+#: /wa-apps/shop/themes/default/cart.html:57
+msgid "Update"
+msgstr "Обновить"
+
+#: /wa-apps/shop/themes/default/cart.html:64
+msgid "Discount coupon (if you have one)"
+msgstr "Купон на скидку (если есть)"
+
+#: /wa-apps/shop/themes/default/cart.html:65
+msgid "Apply"
+msgstr "Применить"
+
+#: /wa-apps/shop/themes/default/cart.html:75
+msgid "Use your current affiliate balance of %d to get a discount"
+msgstr "Для получения скидки воспользуйтесь вашим партнерским бонусом (%d)"
+
+#: /wa-apps/shop/themes/default/cart.html:96
+msgid "This order will earn +%d points to your karma."
+msgstr "Этот заказ добавит +%d баллов к вашей карме."
+
+#: /wa-apps/shop/themes/default/cart.html:100
+msgid "Proceed to checkout"
+msgstr "Оформить заказ"
+
+#: /wa-apps/shop/themes/default/cart.html:76
+msgid "Cancel"
+msgstr "Отмена"
+
+#: /wa-apps/shop/themes/default/cart.html:102
+msgid "This order will add +%d points to your affiliate bonus."
+msgstr "Этот заказ увеличит ваш партнерский бонус на +%d баллов."
+
+#: /wa-apps/shop/themes/default/cart.html:79
+msgid "Your current affiliate bonus of %s points allows you to get an additonal discount of up to %s"
+msgstr ""
+"Вы можете использовать свой партнерский бонус в %s баллов для получения дополнительной скидки в "
+"размере %s"
+
+#: /wa-apps/shop/themes/default/cart.html:83
+msgid "Use bonus"
+msgstr "Использовать бонусные баллы"
+
+#: /wa-apps/shop/themes/default/cart.html:104
+msgid "This order will add +%s points to your affiliate bonus."
+msgstr "Этот заказ добавит +%s баллов к вашему партнерскому бонусу."
+
+msgid "Discount"
+msgstr "Скидка"
+
+#: /wa-apps/shop/themes/default/checkout.contactinfo.html:16
+msgid ""
+"You are currently authorized as <strong>%s</strong>. Please verify or update your contact information "
+"using the form below. Your existing contact info will be automatically updated."
+msgstr ""
+"Вы авторизованы как <strong>%s</strong>. Пожалуйста, подтвердите или обновите вашу контактную "
+"информацию. Изменения будут автоматически сохранены в вашем профиле. "
+
+#: /wa-apps/shop/themes/default/checkout.contactinfo.html:17
+msgid ""
+"If you want to place an order on behalf of another customer, <a href=\"%s\">log out</a> from your "
+"current profile and proceed to checkout again."
+msgstr ""
+"Если вы хотите оформить заказ от имени другого пользователя, <a href=\"%s\">выйдите из сеанса</a> и "
+"перейдите к оформлению заказа заново."
+
+#: /wa-apps/shop/lib/classes/checkout/shopCheckoutContactinfo.class.php:68
+msgid "Email already registered"
+msgstr "Покупатель с таким email-адресом уже зарегистрирован"
+
+#: /wa-apps/shop/themes/default/checkout.contactinfo.html:12
+msgid ""
+"If you want to place an order on behalf of another customer, <a href=\"?logout\">log out</a> from "
+"your current profile and proceed to checkout again."
+msgstr ""
+"Если вы хотите оформить заказ от имени другого пользователя, <a href=\"?logout\">выйдите из сеанса</"
+"a> и перейдите к оформлению заказа заново."
+
+#: /wa-apps/shop/themes/default/checkout.contactinfo.html:23
+msgid "Create permanent user account"
+msgstr "Зарегистрироваться как постоянный покупатель"
+
+#: /wa-apps/shop/themes/default/checkout.contactinfo.html:41
+msgid "Password"
+msgstr "Пароль"
+
+#: /wa-apps/shop/themes/default/cart.html:87
+msgid "Total"
+msgstr "Итого"
+
+#: /wa-apps/shop/themes/default/checkout.shipping.html:14
+msgid "Estimated delivery"
+msgstr "Приблизительное время доставки"
+
+#: /wa-apps/shop/themes/default/checkout.shipping.html:54
+msgid ""
+"Oops! We are sorry, but <strong>we can not ship this order to your selected destination</strong>. "
+"Checkout can not be completed."
+msgstr ""
+"Извините, заказ не может быть оформлен — <strong>мы не можем доставить заказанные товары по "
+"указанному адресу</strong>."
+
+#: /wa-apps/shop/themes/default/checkout.confirmation.html:1
+msgid "Ship to"
+msgstr "Получатель"
+
+#: /wa-apps/shop/themes/default/checkout.confirmation.html:5
+msgid "Bill to"
+msgstr "Плательщик"
+
+#: /wa-apps/shop/themes/default/checkout.confirmation.html:13
+msgid "Quantity"
+msgstr "Количество"
+
+#: /wa-apps/shop/lib/workflow/templates/CommentAction.html:4
+msgid "Comment"
+msgstr "Комментарий"
+
+#: /wa-apps/shop/themes/default/checkout.confirmation.html:70
+msgid "I have read and agree to the <a href=\"%s\" target=\"_blank\">Terms of service</a>"
+msgstr ""
+"Я ознакомился (ознакомилась) с <a href=\"%s\" target=\"_blank\">Условиями предоставления услуг</a> и "
+"принимаю их"
+
+msgid "Click “Save” button below to commit changes."
+msgstr "Нажмите на кнопку «Сохранить», чтобы подтвердить изменения."
+
+#: /wa-apps/shop/themes/default/checkout.html:35
+msgid "Place order"
+msgstr "Оформить заказ"
+
+#: /wa-apps/shop/themes/default/checkout.contactinfo.html:6
+msgid "I’m a new customer"
+msgstr "Я новый покупатель"
+
+#: /wa-apps/shop/themes/default/checkout.contactinfo.html:7
+msgid "I already have an account"
+msgstr "Я уже заказывал ранее и у меня есть аккаунт"
+
+#: /wa-apps/shop/themes/default/checkout.contactinfo.html:9
+msgid "Registered customers apply for affiliate bonuses and discounts on future orders."
+msgstr "Зарегистрированные покупатели получают накопительные бонусные баллы и скидки на будущие заказы."
+
+#: /wa-apps/shop/themes/default/checkout.confirmation.html:19
+msgid "Subtotal"
+msgstr "Подытог"
+
+#: /wa-apps/shop/themes/default/checkout.confirmation.html:27
+msgid "Shipping"
+msgstr "Доставка"
+
+#: /wa-apps/shop/themes/default/checkout.confirmation.html:68
+msgid "You must read and agree to the Terms of service to place an order."
+msgstr "Вы должны прочитать и принять Условия предоставления услуг для того, чтобы оформить заказ."
