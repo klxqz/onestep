@@ -152,6 +152,47 @@
     .onestep-cart .checkout .errormsg.inline { display: inline; margin-left: 10px; }
     .onestep-cart .checkout .checkout-step h3{ color: #000; }
     .onestep-cart .error { color: #a33; }
+
+    @media screen and (max-width: 760px) {
+        .onestep-cart table.cart td { padding: 7px 2px 10px; display: inline-block; border: 0; }
+        .onestep-cart table.cart td img { display: none; }
+        .onestep-cart table.cart td input[type="text"] { min-width: 0; }
+        .onestep-cart table.cart td br { display: none; }
+        .onestep-cart table.cart td a.bold { margin-top: 20px; font-size: 1.3em; }
+        .onestep-cart table.cart td .services { margin-bottom: 0; }
+
+        .onestep-cart .wa-form .wa-field .wa-name { float: none; padding-bottom: 0; }
+        .onestep-cart .wa-form .wa-field .wa-value { margin-left: 0; }
+        .onestep-cart .wa-form .wa-field .wa-value p span { display: block; }
+        .onestep-cart .wa-form .wa-field .wa-value input[type="text"],
+        .onestep-cart .wa-form .wa-field .wa-value input[type="email"],
+        .onestep-cart .wa-form .wa-field .wa-value input[type="password"],
+        .onestep-cart .wa-form .wa-field .wa-value select{ min-width: 200px; max-width: 80%; }
+        
+        .onestep-cart .wa-auth-adapters p { width: 100%; }
+
+        .onestep-cart .checkout { margin: 0 0 30px; }
+        .onestep-cart .checkout ul.checkout-options li { width: 100%; }
+        .onestep-cart .checkout ul.checkout-options li img { display: none; }
+        .onestep-cart .checkout ul.checkout-options li .rate { min-width: 0; width: auto; max-width: 150px; }
+        .onestep-cart .checkout ul.checkout-options li .rate.error { padding-top: 5px; }
+        .onestep-cart .checkout ul.checkout-options li .rate .hint { display: none; }
+        .onestep-cart .checkout ul.checkout-options li .wa-form.wa-address p { font-size: 1em; }
+        .onestep-cart .checkout .checkout-step h2 { font-size: 1.2em; padding: 10px 10px 10px; }
+        .onestep-cart .checkout .checkout-step h2 a.hint { display: none !important; }
+        .onestep-cart .checkout .checkout-step input.large { margin: 0 auto; display: block; }
+        .onestep-cart .checkout .checkout-step-content { padding: 10px 10px 30px; }
+        .onestep-cart .checkout .checkout-step-content.auth ul.menu-v li { padding: 5px 0; }
+        .onestep-cart .checkout .checkout-result h1 { font-size: 2.5em; }
+        .onestep-cart .checkout-header { margin: 10px; font-size: 0.8em; text-align: center; }
+        .onestep-cart .checkout-header .float-right { display: none; }
+        .onestep-cart .checkout li .wa-form { margin-left: -25px; }
+        .onestep-cart .checkout table.table th,
+        .onestep-cart .checkout table.table td { font-size: 0.75em; }
+        .onestep-cart .checkout table.table td .gray { display: none; }
+        .onestep-cart .checkout table.table td.nowrap { white-space: normal; }
+        .onestep-cart .checkout table.table td.nowrap.bold { white-space: nowrap; }
+    }
 </style>
 <script src="{$wa_app_static_url}plugins/onestep/js/jquery.validate.min.js"></script>
 <script type="text/javascript" src="{$cart_js_url}"></script>
