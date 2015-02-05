@@ -51,7 +51,9 @@ class shopOnestepCheckoutPayment extends shopOnestepCheckout {
             }
         }
 
-        $this->setSessionData('payment', $selected);
+        if (!empty($selected)) {
+            $this->setSessionData('payment', $selected);
+        }
     }
 
     public function display() {

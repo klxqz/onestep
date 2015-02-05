@@ -5,7 +5,7 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout {
     protected $step_id = 'shipping';
 
     public function initDefault() {
-        
+
         $session_shiping = $this->getSessionData('shipping');
         if (!empty($session_shiping)) {
             return false;
@@ -55,7 +55,7 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout {
         } else {
             $shipping_address = $address;
         }
-        
+
         $selected_shipping = $this->getSessionData('shipping', array());
 
         $dimension = shopDimension::getInstance()->getDimension('weight');
@@ -129,7 +129,7 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout {
 
 
 
-        $default_method = '';
+        $default_method = array();
         foreach ($methods as $m) {
             if (empty($m['error'])) {
                 $default_method = $m;
@@ -137,14 +137,16 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout {
             }
         }
 
-        $rates = array_keys($default_method['rates']);
+        if (!empty($default_method)) {
+            $rates = array_keys($default_method['rates']);
 
-        $this->setSessionData('shipping', array(
-            'id' => $default_method['id'],
-            'rate_id' => isset($rates[0]) ? $rates[0] : '',
-            'name' => $default_method['name'],
-            'plugin' => $default_method['plugin']
-        ));
+            $this->setSessionData('shipping', array(
+                'id' => $default_method['id'],
+                'rate_id' => isset($rates[0]) ? $rates[0] : '',
+                'name' => $default_method['name'],
+                'plugin' => $default_method['plugin']
+            ));
+        }
     }
 
     public function display() {
@@ -202,7 +204,7 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout {
         } else {
             $selected_shipping = $this->getSessionData('shipping', array());
         }
-        
+
         $dimension = shopDimension::getInstance()->getDimension('weight');
         $currencies = wa('shop')->getConfig()->getCurrencies();
         foreach ($methods as $method_id => $m) {
