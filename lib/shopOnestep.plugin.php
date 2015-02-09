@@ -76,12 +76,14 @@ class shopOnestepPlugin extends shopPlugin {
     public function routing($param) {
         $domain_settings = shopOnestep::getDomainSettings();
 
+        $page_url = $domain_settings['page_url'];
+        $page_url = rtrim($page_url, '/') . "/";
         return array(
-            $domain_settings['page_url'] => 'frontend/onestep',
+            $page_url => 'frontend/onestep',
             'onestepcheck/' => 'frontend/check',
-            'onestep/save/' => 'frontend/save',
-            'onestep/delete/' => 'frontend/delete',
-            'onestep/add/' => 'frontend/add',
+            $page_url . 'save/' => 'frontend/save',
+            $page_url . 'delete/' => 'frontend/delete',
+            $page_url . 'add/' => 'frontend/add',
         );
     }
 
