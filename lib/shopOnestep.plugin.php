@@ -73,7 +73,7 @@ class shopOnestepPlugin extends shopPlugin {
         }
     }
 
-    public function routing($param) {
+    public function routing($route = array()) {
         $domain_settings = shopOnestep::getDomainSettings();
 
         $page_url = $domain_settings['page_url'];
