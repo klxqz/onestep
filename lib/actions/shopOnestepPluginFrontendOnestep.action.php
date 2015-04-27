@@ -477,10 +477,17 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
     protected function createOrder() {
         $checkout_data = wa()->getStorage()->get('shop/checkout');
 
-        $contact = wa()->getUser()->isAuth() ? wa()->getUser() : $checkout_data['contact'];
+        if (wa()->getUser()->isAuth()) {
+            $contact = wa()->getUser();
+        } else if (!empty($checkout_data['contact']) && $checkout_data['contact'] instanceof waContact) {
+            $contact = $checkout_data['contact'];
+        } else {
+            $contact = new waContact();
+        }
+
         $cart = new shopCart();
         $items = $cart->items(false);
-// remove id from item
+        // remove id from item
         foreach ($items as &$item) {
             unset($item['id']);
             unset($item['parent_id']);
@@ -494,7 +501,8 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
             'params' => isset($checkout_data['params']) ? $checkout_data['params'] : array(),
         );
 
-        $order['discount'] = shopDiscounts::apply($order);
+        $order['discount_description'] = null;
+        $order['discount'] = shopDiscounts::apply($order, $order['discount_description']);
 
         if (isset($checkout_data['shipping'])) {
             $order['params']['shipping_id'] = $checkout_data['shipping']['id'];
@@ -540,11 +548,11 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
         $routing_url = wa()->getRouting()->getRootUrl();
         $order['params']['storefront'] = wa()->getConfig()->getDomain() . ($routing_url ? '/' . $routing_url : '');
 
-        if ($ref = wa()->getStorage()->get('shop/referer')) {
+        if (( $ref = waRequest::cookie('referer'))) {
             $order['params']['referer'] = $ref;
-            $ref_parts = parse_url($ref);
+            $ref_parts = @parse_url($ref);
             $order['params']['referer_host'] = $ref_parts['host'];
-// try get search keywords
+            // try get search keywords
             if (!empty($ref_parts['query'])) {
                 $search_engines = array(
                     'text' => 'yandex\.|rambler\.',
@@ -559,13 +567,53 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
                         break;
                     }
                 }
-// default query var name
+                // default query var name
                 if (!$q_var) {
                     $q_var = 'q';
                 }
                 parse_str($ref_parts['query'], $query);
                 if (!empty($query[$q_var])) {
                     $order['params']['keyword'] = $query[$q_var];
+                }
+            }
+        }
+
+        if (( $utm = waRequest::cookie('utm'))) {
+            $utm = json_decode($utm, true);
+            if ($utm && is_array($utm)) {
+                foreach ($utm as $k => $v) {
+                    $order['params']['utm_' . $k] = $v;
+                }
+            }
+        }
+
+        if (( $landing = waRequest::cookie('landing')) && ( $landing = @parse_url($landing))) {
+            if (!empty($landing['query'])) {
+                @parse_str($landing['query'], $arr);
+                if (!empty($arr['gclid']) && !empty($order['params']['referer_host']) && strpos($order['params']['referer_host'], 'google') !== false) {
+                    $order['params']['referer_host'] .= ' (cpc)';
+                    $order['params']['cpc'] = 1;
+                } else if (!empty($arr['_openstat']) && !empty($order['params']['referer_host']) && strpos($order['params']['referer_host'], 'yandex') !== false) {
+                    $order['params']['referer_host'] .= ' (cpc)';
+                    $order['params']['openstat'] = $arr['_openstat'];
+                    $order['params']['cpc'] = 1;
+                }
+            }
+
+            $order['params']['landing'] = $landing['path'];
+        }
+
+        // A/B tests
+        $abtest_variants_model = new shopAbtestVariantsModel();
+        foreach (waRequest::cookie() as $k => $v) {
+            if (substr($k, 0, 5) == 'waabt') {
+                $variant_id = $v;
+                $abtest_id = substr($k, 5);
+                if (wa_is_int($abtest_id) && wa_is_int($variant_id)) {
+                    $row = $abtest_variants_model->getById($variant_id);
+                    if ($row && $row['abtest_id'] == $abtest_id) {
+                        $order['params']['abt' . $abtest_id] = $variant_id;
+                    }
                 }
             }
         }
@@ -599,7 +647,9 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
             wa()->getStorage()->remove('shop/checkout');
             wa()->getStorage()->set('shop/order_id', $order_id);
 
-            return true;
+            return $order_id;
+        } else {
+            return false;
         }
     }
 
