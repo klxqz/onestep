@@ -363,14 +363,14 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
                         $error = true;
                     }
                 }
-
-
                 if (waRequest::post('confirmation') && !$error && !self::checkCart()) {
-                    if (self::createOrder()) {
+                    if ($order_id = self::createOrder()) {
+                        wa()->getStorage()->set('shop/success_order_id', $order_id);
                         wa()->getResponse()->redirect(wa()->getRouteUrl('/frontend/checkout', array('step' => 'success')));
                     }
                 }
             }
+            $view->assign('submit', true);
         }
         $checkout_tpls = array();
         foreach ($steps as $step_id => $step) {

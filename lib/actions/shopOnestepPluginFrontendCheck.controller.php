@@ -8,8 +8,7 @@ class shopOnestepPluginFrontendCheckController extends waJsonController {
     }
 
     public function checkOrder() {
-        $app_settings_model = new waAppSettingsModel();
-        $settings = $app_settings_model->get(array('shop', 'onestep'));
+        $domain_settings = shopOnestep::getDomainSettings();
         
         $cart = new shopCart();
         $def_currency = wa('shop')->getConfig()->getCurrency(true);
@@ -17,7 +16,7 @@ class shopOnestepPluginFrontendCheckController extends waJsonController {
 
         $total = $cart->total(true);
         $total = shop_currency($total, $cur_currency, $def_currency, false);
-        $min_sum = $settings['min_sum'];
+        $min_sum = $domain_settings['min_sum'];
 
         if ($total < $min_sum) {
             return false;

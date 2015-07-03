@@ -76,14 +76,7 @@
         check_url: '{$wa_app_url}onestepcheck/',
         total: $('.cart-total').html(),
         shipping_url: "{$wa->getUrl('/frontend/shipping')}",
-        validate: {intval($settings.validate)}
-    });
-    $(document).ready(function() {
-        if ($('.checkout-step .error:visible').length) {
-            var destination = $('.checkout-step .error:visible').offset().top;
-            $('html,body').animate({
-                scrollTop: destination
-            }, 1100);
-        }
-    });
+        validate: {intval($settings.validate)},
+        submit: {if !empty($submit)}1{else}0{/if}
+            });
 </script>

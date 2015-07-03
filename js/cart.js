@@ -7,7 +7,6 @@ $(function () {
             $(".cart-discount").closest('tr').show();
         }
         $(".cart-discount").html('&minus; ' + data.discount);
-
         if (data.add_affiliate_bonus) {
             $(".affiliate").show().html(data.add_affiliate_bonus);
         } else {
@@ -15,7 +14,7 @@ $(function () {
         }
     }
 
-    // add to cart block: services
+// add to cart block: services
     $(".services input:checkbox").click(function () {
         var obj = $('select[name="service_variant[' + $(this).closest('tr').data('id') + '][' + $(this).val() + ']"]');
         if (obj.length) {
@@ -26,8 +25,6 @@ $(function () {
             }
         }
     });
-
-
     $(".cart a.delete").click(function () {
         var tr = $(this).closest('tr');
         $.post('delete/', {html: 1, id: tr.data('id')}, function (response) {
@@ -39,7 +36,6 @@ $(function () {
         }, "json");
         return false;
     });
-
     $(".cart input.qty").change(function () {
         var that = $(this);
         if (that.val() > 0) {
@@ -62,7 +58,6 @@ $(function () {
             that.val(1);
         }
     });
-
     $(".cart .services input:checkbox").change(function () {
         var div = $(this).closest('div');
         var tr = $(this).closest('tr');
@@ -86,7 +81,6 @@ $(function () {
             }, "json");
         }
     });
-
     $(".cart .services select").change(function () {
         var tr = $(this).closest('tr');
         $.post('save/', {html: 1, id: $(this).closest('div').data('id'), 'service_variant_id': $(this).val()}, function (response) {
@@ -94,14 +88,11 @@ $(function () {
             updateCart(response.data);
         }, "json");
     });
-
     $("#cancel-affiliate").click(function () {
         $(this).closest('form').append('<input type="hidden" name="use_affiliate" value="0">').submit();
         return false;
     })
 });
-
-
 (function ($) {
     "use strict";
     $.onestep = {
@@ -116,11 +107,23 @@ $(function () {
             this.initShipping();
             this.initPayment();
             this.initConfirmation();
-            //this.setFirstMethod();
+            /*this.setFirstMethod();*/
             if (this.options.validate) {
                 this.valide();
             }
 
+            if (this.options.submit) {
+                this.errorScroll();
+            }
+        },
+        errorScroll: function () {
+            if ($('.checkout-step .error:visible').length) {
+
+                var destination = $('.checkout-step .error:visible').offset().top;
+                $('html,body').animate({
+                    scrollTop: destination
+                }, 1100);
+            }
         },
         valide: function () {
             $("form.checkout-form").validate({
@@ -133,7 +136,6 @@ $(function () {
                     terms: "Это поле обязательное для заполнения"
                 }
             });
-
             $('form.checkout-form .wa-required input:visible').each(function () {
                 $(this).rules('add', {
                     required: true,
@@ -146,10 +148,8 @@ $(function () {
         syncAddresses: function () {
             var self = this;
             var input_address_fields = ['street', 'city', 'zip', 'region', 'country'];
-
             for (var i in input_address_fields) {
                 var input_address_field = input_address_fields[i];
-
                 var selectors = [];
                 selectors.push('input[name="customer[address.shipping][' + input_address_field + ']"]');
                 selectors.push('select[name="customer[address.shipping][' + input_address_field + ']"]');
@@ -163,7 +163,6 @@ $(function () {
                 $('.checkout-form').on('change', text_selector, function () {
                     var value = $(this).val();
                     var selector = self.getSelector($(this).attr('name'));
-
                     $(selector).each(function () {
                         var tag = $(this).get(0).tagName;
                         switch (tag) {
@@ -175,14 +174,12 @@ $(function () {
                                 break;
                         }
                     });
-
                 });
             }
 
         },
         getSelector: function (name) {
             var input_address_fields = ['street', 'city', 'zip', 'region', 'country'];
-
             for (var i in input_address_fields) {
                 var input_address_field = input_address_fields[i];
                 if (name.indexOf('[' + input_address_field + ']') != -1) {
@@ -364,11 +361,14 @@ $(function () {
             $("input[name='user_type']").change(function () {
                 if ($("input[name='user_type']:checked").val() == '1') {
                     $("#login-form input").removeAttr('disabled');
+                    $(".checkout-step").hide();
+                    $(this).closest('.checkout-step').show();
                     $(this).closest('div.auth').next(".checkout-step-content").hide();
                     $("input[type=submit]:last").hide();
                     $("#login-form").show();
                 } else {
                     $("#login-form input").attr('disabled', 'disabled');
+                    $(".checkout-step").show();
                     $("#login-form").hide();
                     $(this).closest('div.auth').next(".checkout-step-content").show();
                     $("input[type=submit]:last").show();
