@@ -654,11 +654,11 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
     }
 
     protected function getStep($step_id) {
-        if (!isset($this->steps[$step_id])) {
+        if (!isset(self::$steps[$step_id])) {
             $class_name = 'shopOnestepCheckout' . ucfirst($step_id);
-            $this->steps[$step_id] = new $class_name();
+            self::$steps[$step_id] = new $class_name();
         }
-        return $this->steps[$step_id];
+        return self::$steps[$step_id];
     }
 
 }
