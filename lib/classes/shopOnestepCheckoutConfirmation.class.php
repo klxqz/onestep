@@ -60,7 +60,7 @@ class shopOnestepCheckoutConfirmation extends shopOnestepCheckout
         if (!isset($order['shipping'])) {
             $shipping_step = new shopOnestepCheckoutShipping();
             $rate = $shipping_step->getRate();
-            if ($rate) {
+            if ($rate && is_array($rate)) {
                 $order['shipping'] = $rate['rate'];
             } else {
                 $order['shipping'] = 0;
