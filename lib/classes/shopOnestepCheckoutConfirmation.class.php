@@ -1,15 +1,14 @@
 <?php
 
-class shopOnestepCheckoutConfirmation extends shopOnestepCheckout
-{
+class shopOnestepCheckoutConfirmation extends shopOnestepCheckout {
+
     protected $step_id = 'confirmation';
-    
+
     public function initDefault() {
         
     }
 
-    public function display()
-    {
+    public function display() {
 
         $settings = wa('shop')->getConfig()->getCheckoutSettings();
 
@@ -42,9 +41,9 @@ class shopOnestepCheckoutConfirmation extends shopOnestepCheckout
             $billing_address = array('data' => array(), 'value' => '');
         }
 
-        $discount_rate = ((float)$subtotal) ? ($order['discount'] / $subtotal) : 0;
+        $discount_rate = ((float) $subtotal) ? ($order['discount'] / $subtotal) : 0;
         $taxes = shopTaxes::apply($items, array('shipping' => $shipping_address['data'],
-            'billing' => $billing_address['data'], 'discount_rate' => $discount_rate));
+                    'billing' => $billing_address['data'], 'discount_rate' => $discount_rate));
 
         $tax = 0;
         $tax_included = 0;
@@ -56,11 +55,11 @@ class shopOnestepCheckoutConfirmation extends shopOnestepCheckout
                 $tax_included += $t['sum_included'];
             }
         }
-        
+
         if (!isset($order['shipping'])) {
             $shipping_step = new shopOnestepCheckoutShipping();
             $rate = $shipping_step->getRate();
-            if ($rate) {
+            if ($rate && is_array($rate)) {
                 $order['shipping'] = $rate['rate'];
             } else {
                 $order['shipping'] = 0;
@@ -113,12 +112,9 @@ class shopOnestepCheckoutConfirmation extends shopOnestepCheckout
 //            'step' => $step_number,
 //            'description' => ERROR MESSAGE HERE
 //        ));
-
     }
 
-
-    public function execute()
-    {
+    public function execute() {
         if ($comment = waRequest::post('comment')) {
             $this->setSessionData('comment', $comment);
         }
@@ -129,27 +125,26 @@ class shopOnestepCheckoutConfirmation extends shopOnestepCheckout
         return true;
     }
 
-    public function getOptions($config)
-    {
+    public function getOptions($config) {
         $terms = include(wa('shop')->getConfig()->getAppPath('lib/config/data/terms.php'));
         $locale = wa()->getLocale();
         if (!isset($terms[$locale])) {
             $locale = 'en_US';
         }
         return '<div class="field">
-                <div class="name">'._w('Terms of service').'<br><span class="hint">HTML</span></div>
+                <div class="name">' . _w('Terms of service') . '<br><span class="hint">HTML</span></div>
                 <div class="value">
-                    <textarea id="confirmation-terms" name="config[terms]">'.(!empty($config['terms']) ? $config['terms'] : '').'</textarea>
+                    <textarea id="confirmation-terms" name="config[terms]">' . (!empty($config['terms']) ? $config['terms'] : '') . '</textarea>
                 </div>
                 <div class="value">
-                    <p class="hint">'._w('If you want your customers to be prompted to read and agree to your company’s terms of service, refund and privacy policies or any other legal information during the checkout, enter the text to the field above. A checkbox to agree and a link to read this legal information will be shown on the Confirmation checkout step.').'
-                    <a id="confirmation-generate-terms" href="#" class="inline-link"><b><i>'._w('Generate sample policy').'</i></b></a></p>
+                    <p class="hint">' . _w('If you want your customers to be prompted to read and agree to your company’s terms of service, refund and privacy policies or any other legal information during the checkout, enter the text to the field above. A checkbox to agree and a link to read this legal information will be shown on the Confirmation checkout step.') . '
+                    <a id="confirmation-generate-terms" href="#" class="inline-link"><b><i>' . _w('Generate sample policy') . '</i></b></a></p>
                 </div>
-                <div style="display:none" id="confirmation-terms-sample">'.$terms[$locale].'</div>
+                <div style="display:none" id="confirmation-terms-sample">' . $terms[$locale] . '</div>
                 <script>
                     $("#confirmation-generate-terms").click(function () {
                         var t = $("#confirmation-terms");
-                        if (!t.val().length || confirm("'._w('Your current terms of service content will be erased. Are you sure?').'")) {
+                        if (!t.val().length || confirm("' . _w('Your current terms of service content will be erased. Are you sure?') . '")) {
                             t.val($("#confirmation-terms-sample").html());
                             $("#confirmation-terms-red").show();
                         }
