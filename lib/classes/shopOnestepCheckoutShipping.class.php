@@ -45,7 +45,7 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout {
         if (!$address) {
             $shipping_address = array();
             $address_form = true;
-            if ($settings['contactinfo']['fields']['address']) {
+            if (!empty($settings['contactinfo']['fields']['address'])) {
                 foreach ($settings['contactinfo']['fields']['address']['fields'] as $k => $f) {
                     if (!empty($f['value'])) {
                         $shipping_address[$k] = $f['value'];
@@ -156,6 +156,8 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout {
         } else {
             $methods = $plugin_model->listPlugins('shipping');
         }
+        $view = wa()->getView();
+        $view->assign('all_checkout_shipping_methods_ids', array_keys($methods));
 
         $address = $this->getAddress();
         $empty = true;
@@ -183,7 +185,7 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout {
         if (!$address) {
             $shipping_address = array();
             $address_form = true;
-            if ($settings['contactinfo']['fields']['address']) {
+            if (!empty($settings['contactinfo']['fields']['address'])) {
                 foreach ($settings['contactinfo']['fields']['address']['fields'] as $k => $f) {
                     if (!empty($f['value'])) {
                         $shipping_address[$k] = $f['value'];
@@ -289,7 +291,7 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout {
         }
 
 
-        $view = wa()->getView();
+
         $view->assign('checkout_shipping_methods', $methods);
         $default_method = '';
         foreach ($methods as $m) {
@@ -542,16 +544,17 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout {
 
             if ($data = waRequest::post('customer_' . $shipping_id)) {
 
-                $settings = wa('shop')->getConfig()->getCheckoutSettings();
-                if (!isset($settings['contactinfo']) ||
-                        (!isset($settings['contactinfo']['fields']['address.shipping']) && !isset($settings['contactinfo']['fields']['address']))) {
-                    $settings = wa('shop')->getConfig()->getCheckoutSettings(true);
-                }
-                $plugin = shopShipping::getPlugin(null, $shipping_id);
-                $form = $this->getAddressForm($shipping_id, $plugin, $settings, array(), true);
-                if (!$form->isValid()) {
-                    return false;
-                }
+                /*
+                  $settings = wa('shop')->getConfig()->getCheckoutSettings();
+                  if (!isset($settings['contactinfo']) ||
+                  (!isset($settings['contactinfo']['fields']['address.shipping']) && !isset($settings['contactinfo']['fields']['address']))) {
+                  $settings = wa('shop')->getConfig()->getCheckoutSettings(true);
+                  }
+                  $plugin = shopShipping::getPlugin(null, $shipping_id);
+                  $form = $this->getAddressForm($shipping_id, $plugin, $settings, array(), true);
+                  if (!$form->isValid()) {
+                  return false;
+                  } */
 
                 $contact = $this->getContact();
                 if (!$contact) {

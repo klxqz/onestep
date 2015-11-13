@@ -24,6 +24,8 @@
 
     <!-- plugin hook: 'frontend_checkout' -->
     {* @event frontend_checkout.%plugin_id% *}
-{foreach $frontend_checkout as $_}{$_}{/foreach}
+    {foreach $frontend_checkout as $_}
+        {$_}
+    {/foreach}
 
 </div>

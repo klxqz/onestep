@@ -107,7 +107,6 @@ $(function () {
             this.initShipping();
             this.initPayment();
             this.initConfirmation();
-            /*this.setFirstMethod();*/
             if (this.options.validate) {
                 this.valide();
             }
@@ -118,7 +117,6 @@ $(function () {
         },
         errorScroll: function () {
             if ($('.checkout-step .error:visible').length) {
-
                 var destination = $('.checkout-step .error:visible').offset().top;
                 $('html,body').animate({
                     scrollTop: destination
@@ -160,7 +158,7 @@ $(function () {
                 }
 
                 var text_selector = selectors.join(',');
-                $('.checkout-form').on('change', text_selector, function () {
+                $('form.checkout-form').on('change', text_selector, function () {
                     var value = $(this).val();
                     var selector = self.getSelector($(this).attr('name'));
                     $(selector).each(function () {
@@ -320,7 +318,8 @@ $(function () {
             this.auth();
         },
         initShipping: function () {
-            this.checkoutOptions();
+            this.externalMethods();
+            this.shippingOptions();
             this.addressChange();
             this.shippingRates();
             this.setFirstMethod();
@@ -376,7 +375,18 @@ $(function () {
             });
             $("input[name='user_type']").change();
         },
-        checkoutOptions: function () {
+        externalMethods: function () {
+            if (this.options.external_methods.length) {
+                $.get(this.options.shipping_url, {
+                    shipping_id: this.options.external_methods
+                }, function (response) {
+                    for (var shipping_id in response.data) {
+                        $.onestep.responseCallback(shipping_id, response.data[shipping_id]);
+                    }
+                }, "json");
+            }
+        },
+        shippingOptions: function () {
             $(".checkout-options input:radio").change(function () {
                 if ($(this).is(':checked') && !$(this).data('ignore')) {
                     $(".checkout-options .wa-form").hide();

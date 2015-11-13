@@ -8,6 +8,7 @@ class shopOnestepPlugin extends shopPlugin {
         'status' => 1,
         'page_url' => 'onestep/',
         'page_title' => 'Корзина',
+        'desktop_only' => 0,
         'min_sum' => 0,
         'validate' => 1,
         'templates' => array(
@@ -16,7 +17,7 @@ class shopOnestepPlugin extends shopPlugin {
                 'tpl_path' => 'plugins/onestep/templates/',
                 'tpl_name' => 'onestep',
                 'tpl_ext' => 'html',
-                'public' => false
+                'public' => false,
             ),
             'checkout' => array(
                 'name' => 'Шаблон оформления заказа (checkout.html)',
@@ -66,8 +67,13 @@ class shopOnestepPlugin extends shopPlugin {
     public function frontendHead($param) {
         $domain_settings = shopOnestep::getDomainSettings();
 
-        if ($this->getSettings('status') && $domain_settings['status'] && wa()->getRouting()->getCurrentUrl() != 'checkout/success/' &&
-                (wa()->getRouting()->getCurrentUrl() == 'cart/' || preg_match('@^checkout/@i', wa()->getRouting()->getCurrentUrl()))) {
+        if (
+                !(waRequest::isMobile() && $domain_settings['desktop_only']) &&
+                $this->getSettings('status') && $domain_settings['status'] &&
+                wa()->getRouting()->getCurrentUrl() != 'checkout/success/' &&
+                wa()->getRouting()->getCurrentUrl() != 'checkout/error/' &&
+                (wa()->getRouting()->getCurrentUrl() == 'cart/' || preg_match('@^checkout/@i', wa()->getRouting()->getCurrentUrl()))
+        ) {
             $onestep_url = wa()->getRouteUrl('shop/frontend/onestep');
             wa()->getResponse()->redirect($onestep_url);
         }

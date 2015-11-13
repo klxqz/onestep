@@ -69,9 +69,16 @@
     {/if}
 
 </div>
-
+{$external_methods = []}
+{foreach $checkout_shipping_methods as $m}
+    {if $m.external}
+        {$external_methods[] = $m.id}
+    {/if}
+{/foreach}
 <script type="text/javascript">
     $.onestep.init({
+        external_methods: [{implode(',', $external_methods)}],
+        shipping_methods_ids: [{implode(',', $all_checkout_shipping_methods_ids)}],
         steps: ['{implode("', '", array_keys($checkout_steps))}'],
         check_url: '{$wa_app_url}onestepcheck/',
         total: $('.cart-total').html(),

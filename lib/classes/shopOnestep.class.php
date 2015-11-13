@@ -88,8 +88,7 @@ class shopOnestep {
                         }
 
                         $post_template = $domains_settings[$domain_route]['templates'][$id]['template'];
-
-                        if ($source_content != $post_template) {
+                        if (preg_replace('/\s/', '', $source_content) != preg_replace('/\s/', '', $post_template)) {
                             $f = fopen($template_path, 'w');
                             if (!$f) {
                                 throw new waException('Не удаётся сохранить шаблон. Проверьте права на запись ' . $template_path);

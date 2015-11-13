@@ -1,6 +1,5 @@
 <div class="checkout-content" data-step-id="shipping">
     <ul class="checkout-options">
-        {$external_methods = []}
         {foreach $checkout_shipping_methods as $m}
             <li class="shipping-{$m.id}">
                 {if empty($m.error)}
@@ -9,7 +8,6 @@
                             {if $m.rate !== null}
                                 {shop_currency_html($m.rate, $m.currency)}
                             {elseif $m.external}
-                                {$external_methods[] = $m.id}
                                 [`Loading...`] <i class="icon16 loading"></i>
                             {/if}
                         </span>
@@ -66,22 +64,10 @@
             </li>
         {/foreach}
     </ul>
-    <script type="text/javascript">
-        $(function() {
-        {if $external_methods}
-            $.get("{$wa->getUrl('/frontend/shipping')}", {
-                shipping_id: [{implode(',', $external_methods)}]
-            }, function(response) {
-                for (var shipping_id in response.data) {
-                    $.onestep.responseCallback(shipping_id, response.data[shipping_id]);
-                }
-            }, "json");
-        {/if}
-        });
-    </script>
-
     <!-- plugin hook: 'frontend_checkout' -->
     {* @event frontend_checkout.%plugin_id% *}
-{foreach $frontend_checkout as $_}{$_}{/foreach}
+    {foreach $frontend_checkout as $_}
+        {$_}
+    {/foreach}
 
 </div>
