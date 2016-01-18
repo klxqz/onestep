@@ -104,6 +104,7 @@
                                 Только для ПК
                             </div>
                             <div class="value">
+                                <input type="hidden" name="domains_settings[{$domain_hash}][desktop_only]" value="0" />
                                 <input type="checkbox"{if $setting.desktop_only|default:0} checked="checked"{/if} name="domains_settings[{$domain_hash}][desktop_only]" value="1" />
                                 <p class="hint">
                                     Плагин работает только для настольных компьютеров и отключается для мобильных устройств.<br/> 

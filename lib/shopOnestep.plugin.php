@@ -68,7 +68,7 @@ class shopOnestepPlugin extends shopPlugin {
         $domain_settings = shopOnestep::getDomainSettings();
 
         if (
-                !(waRequest::isMobile() && $domain_settings['desktop_only']) &&
+                !(waRequest::isMobile() && !empty($domain_settings['desktop_only'])) &&
                 $this->getSettings('status') && $domain_settings['status'] &&
                 wa()->getRouting()->getCurrentUrl() != 'checkout/success/' &&
                 wa()->getRouting()->getCurrentUrl() != 'checkout/error/' &&

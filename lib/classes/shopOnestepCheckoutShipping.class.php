@@ -157,7 +157,8 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout {
             $methods = $plugin_model->listPlugins('shipping');
         }
         $view = wa()->getView();
-        $view->assign('all_checkout_shipping_methods_ids', array_keys($methods));
+        $all_methods = $plugin_model->listPlugins('shipping');
+        $view->assign('all_checkout_shipping_methods_ids', array_keys($all_methods));
 
         $address = $this->getAddress();
         $empty = true;
