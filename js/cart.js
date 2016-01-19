@@ -363,12 +363,14 @@ $(function () {
                     $(".checkout-step").hide();
                     $(this).closest('.checkout-step').show();
                     $(this).closest('div.auth').next(".checkout-step-content").hide();
+                    $("#create-user-div").find('input').attr('disabled', 'disabled');
                     $("input[type=submit]:last").hide();
                     $("#login-form").show();
                 } else {
                     $("#login-form input").attr('disabled', 'disabled');
                     $(".checkout-step").show();
                     $("#login-form").hide();
+                    $("#create-user-div").find('input').removeAttr('disabled');
                     $(this).closest('div.auth').next(".checkout-step-content").show();
                     $("input[type=submit]:last").show();
                 }
