@@ -52,27 +52,61 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
             wa()->getStorage()->remove('shop/cart');
         }
 
-        $cart_model = new shopCartItemsModel();
-
         $cart = new shopCart();
         $code = $cart->getCode();
 
         $errors = array();
+        $cart_model = new shopCartItemsModel();
+        //$items = $cart_model->where('code= ?', $code)->order('parent_id')->fetchAll('id');
+        $items = $cart->items(false);
 
-        $not_available_items = $cart_model->getNotAvailableProducts($code, !wa()->getSetting('ignore_stock_count'));
+        $total = $cart->total(false);
+        $order = array(
+            'currency' => wa()->getConfig()->getCurrency(false),
+            'total' => $total,
+            'items' => $items
+        );
+        $discount_description = '';
+        $order['discount'] = $discount = shopDiscounts::calculate($order, false, $discount_description);
+        $order['total'] = $total = $total - $order['discount'];
+
+        $saved_quantity = $cart_model->select('id,quantity')->where("type='product' AND code = s:code", array('code' => $code))->fetchAll('id');
+        $quantity = waRequest::post('quantity', array());
+
+        foreach ($quantity as $id => $q) {
+            if (isset($saved_quantity[$id]) && ($q != $saved_quantity[$id])) {
+                $cart->setQuantity($id, $q);
+            }
+        }
+
+        if (wa()->getSetting('ignore_stock_count')) {
+            $check_count = false;
+        } else {
+            $check_count = true;
+            if (wa()->getSetting('limit_main_stock') && waRequest::param('stock_id')) {
+                $check_count = waRequest::param('stock_id');
+            }
+        }
+        $not_available_items = $cart_model->getNotAvailableProducts($code, $check_count);
         foreach ($not_available_items as $row) {
             if ($row['sku_name']) {
                 $row['name'] .= ' (' . $row['sku_name'] . ')';
             }
             if ($row['available']) {
-                $errors[$row['id']] = sprintf(_w('Only %d pcs of %s are available, and you already have all of them in your shopping cart.'), $row['count'], $row['name']);
+                if ($row['count'] > 0) {
+                    $errors[$row['id']] = sprintf(_w('Only %d pcs of %s are available, and you already have all of them in your shopping cart.'), $row['count'], $row['name']);
+                } else {
+                    $errors[$row['id']] = sprintf(_w('Oops! %s just went out of stock and is not available for purchase at the moment. We apologize for the inconvenience. Please remove this product from your shopping cart to proceed.'), $row['name']);
+                }
             } else {
-                $errors[$row['id']] = _w('Oops! %s is not available for purchase at the moment. Please remove this product from your shopping cart to proceed.');
+                $errors[$row['id']] = sprintf(_w('Oops! %s is not available for purchase at the moment. Please remove this product from your shopping cart to proceed.'), $row['name']);
             }
         }
-
-        $items = $cart_model->where('code= ?', $code)->order('parent_id')->fetchAll('id');
-
+        foreach ($items as $row) {
+            if (!$row['quantity'] && !isset($errors[$row['id']])) {
+                $errors[$row['id']] = null;
+            }
+        }
 
         $product_ids = $sku_ids = $service_ids = $type_ids = array();
         foreach ($items as $item) {
@@ -83,41 +117,14 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
         $product_ids = array_unique($product_ids);
         $sku_ids = array_unique($sku_ids);
 
-        $product_model = new shopProductModel();
-        if (waRequest::param('url_type') == 2) {
-            $products = $product_model->getWithCategoryUrl($product_ids);
-        } else {
-            $products = $product_model->getById($product_ids);
-        }
-
-        $sku_model = new shopProductSkusModel();
-        $skus = $sku_model->getByField('id', $sku_ids, 'id');
-
-        $image_model = new shopProductImagesModel();
-
-        $delete_items = array();
         foreach ($items as $item_id => &$item) {
-            if (!isset($skus[$item['sku_id']])) {
-                unset($items[$item_id]);
-                $delete_items[] = $item_id;
-                continue;
-            }
             if ($item['type'] == 'product') {
-                $item['product'] = $products[$item['product_id']];
-                $sku = $skus[$item['sku_id']];
-                if ($sku['image_id'] && $sku['image_id'] != $item['product']['image_id']) {
-                    $img = $image_model->getById($sku['image_id']);
-                    if ($img) {
-                        $item['product']['image_id'] = $sku['image_id'];
-                        $item['product']['ext'] = $img['ext'];
-                    }
-                }
-                $item['sku_name'] = $sku['name'];
-                $item['sku_code'] = $sku['sku'];
-                $item['price'] = $sku['price'];
-                $item['compare_price'] = $sku['compare_price'];
-                $item['currency'] = $item['product']['currency'];
                 $type_ids[] = $item['product']['type_id'];
+
+                if (!$item['quantity'] && !isset($errors[$item_id])) {
+                    $errors[$item_id] = _w('Oops! %s is not available for purchase at the moment. Please remove this product from your shopping cart to proceed.');
+                }
+
                 if (isset($errors[$item_id])) {
                     $item['error'] = $errors[$item_id];
                     if (strpos($item['error'], '%s') !== false) {
@@ -128,10 +135,6 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
         }
         unset($item);
 
-        if ($delete_items) {
-            $cart_model->deleteByField(array('code' => $code, 'id' => $delete_items));
-        }
-
         $type_ids = array_unique($type_ids);
 
         // get available services for all types of products
@@ -139,20 +142,32 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
         $rows = $type_services_model->getByField('type_id', $type_ids, true);
         $type_services = array();
         foreach ($rows as $row) {
-            $service_ids[] = $row['service_id'];
+            $service_ids[$row['service_id']] = $row['service_id'];
             $type_services[$row['type_id']][$row['service_id']] = true;
         }
 
-        // get services for all products
+        // get services for products and skus, part 1
         $product_services_model = new shopProductServicesModel();
         $rows = $product_services_model->getByProducts($product_ids);
-
-        $product_services = $sku_services = array();
-        foreach ($rows as $row) {
+        foreach ($rows as $i => $row) {
             if ($row['sku_id'] && !in_array($row['sku_id'], $sku_ids)) {
+                unset($rows[$i]);
                 continue;
             }
-            $service_ids[] = $row['service_id'];
+            $service_ids[$row['service_id']] = $row['service_id'];
+        }
+
+        $service_ids = array_unique(array_values($service_ids));
+
+        // Get services
+        $service_model = new shopServiceModel();
+        $services = $service_model->getByField('id', $service_ids, 'id');
+        shopRounding::roundServices($services);
+
+        // get services for products and skus, part 2
+        $product_services = $sku_services = array();
+        shopRounding::roundServiceVariants($rows, $services);
+        foreach ($rows as $row) {
             if (!$row['sku_id']) {
                 $product_services[$row['product_id']][$row['service_id']]['variants'][$row['service_variant_id']] = $row;
             }
@@ -161,22 +176,23 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
             }
         }
 
-        $service_ids = array_unique($service_ids);
-
-        $service_model = new shopServiceModel();
+        // Get service variants
         $variant_model = new shopServiceVariantsModel();
-        $services = $service_model->getByField('id', $service_ids, 'id');
-        foreach ($services as &$s) {
-            unset($s['id']);
-        }
-        unset($s);
-
         $rows = $variant_model->getByField('service_id', $service_ids, true);
+        shopRounding::roundServiceVariants($rows, $services);
         foreach ($rows as $row) {
             $services[$row['service_id']]['variants'][$row['id']] = $row;
             unset($services[$row['service_id']]['variants'][$row['id']]['id']);
         }
 
+        // When assigning services into cart items, we don't want service ids there
+        foreach ($services as &$s) {
+            unset($s['id']);
+        }
+        unset($s);
+
+
+        // Assign service and product data into cart items
         foreach ($items as $item_id => $item) {
             if ($item['type'] == 'product') {
                 $p = $item['product'];
@@ -262,7 +278,6 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
             }
         }
 
-
         foreach ($items as $item_id => $item) {
             $price = shop_currency($item['price'] * $item['quantity'], $item['currency'], null, false);
             if (isset($item['services'])) {
@@ -279,12 +294,6 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
             $items[$item_id]['full_price'] = $price;
         }
 
-
-        $total = $cart->total(false);
-        $order = array('total' => $total, 'items' => $items);
-        $order['discount'] = $discount = shopDiscounts::calculate($order);
-        $order['total'] = $total = $total - $order['discount'];
-
         $data = wa()->getStorage()->get('shop/checkout');
         $this->view->assign('cart', array(
             'items' => $items,
@@ -293,22 +302,29 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
         ));
 
         $this->view->assign('coupon_code', isset($data['coupon_code']) ? $data['coupon_code'] : '');
+        if (!empty($data['coupon_code']) && !empty($order['params']['coupon_discount'])) {
+            $this->view->assign('coupon_discount', $order['params']['coupon_discount']);
+        }
         if (shopAffiliate::isEnabled()) {
-            $affiliate_bonus = 0;
+            $affiliate_bonus = $affiliate_discount = 0;
             if ($this->getUser()->isAuth()) {
                 $customer_model = new shopCustomerModel();
                 $customer = $customer_model->getById($this->getUser()->getId());
                 $affiliate_bonus = $customer ? round($customer['affiliate_bonus'], 2) : 0;
             }
             $this->view->assign('affiliate_bonus', $affiliate_bonus);
+
             $use = !empty($data['use_affiliate']);
             $this->view->assign('use_affiliate', $use);
+            $usage_percent = (float) wa()->getSetting('affiliate_usage_percent', 0, 'shop');
+            $this->view->assign('affiliate_percent', $usage_percent);
+            $affiliate_discount = self::getAffiliateDiscount($affiliate_bonus, $order);
             if ($use) {
-                $discount -= shop_currency(shopAffiliate::convertBonus($order['params']['affiliate_bonus']), $this->getConfig()->getCurrency(true), null, false);
+                $discount -= $affiliate_discount;
                 $this->view->assign('used_affiliate_bonus', $order['params']['affiliate_bonus']);
             }
+            $this->view->assign('affiliate_discount', $affiliate_discount);
 
-            $order['currency'] = $this->getConfig()->getCurrency(false);
             $add_affiliate_bonus = shopAffiliate::calculateBonus($order);
             $this->view->assign('add_affiliate_bonus', round($add_affiliate_bonus, 2));
         }
@@ -320,12 +336,36 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
          */
         $this->view->assign('frontend_cart', wa()->event('frontend_cart'));
 
+        $this->getResponse()->setTitle(_w('Cart'));
+
         $checkout_flow = new shopCheckoutFlowModel();
         $checkout_flow->add(array(
             'code' => $code,
             'step' => 0,
             'description' => null /* TODO: Error message here if exists */
         ));
+    }
+
+    public static function getAffiliateDiscount($affiliate_bonus, $order) {
+        $data = wa()->getStorage()->get('shop/checkout');
+        $use = !empty($data['use_affiliate']);
+        $usage_percent = (float) wa()->getSetting('affiliate_usage_percent', 0, 'shop');
+        if (!$usage_percent) {
+            $usage_percent = 100;
+        }
+        $affiliate_discount = 0;
+        if ($use) {
+            $affiliate_discount = shop_currency(shopAffiliate::convertBonus($order['params']['affiliate_bonus']), wa('shop')->getConfig()->getCurrency(true), null, false);
+            if ($usage_percent) {
+                $affiliate_discount = min($affiliate_discount, ($order['total'] + $affiliate_discount) * $usage_percent / 100.0);
+            }
+        } elseif ($affiliate_bonus) {
+            $affiliate_discount = shop_currency(shopAffiliate::convertBonus($affiliate_bonus), wa('shop')->getConfig()->getCurrency(true), null, false);
+            if ($usage_percent) {
+                $affiliate_discount = min($affiliate_discount, $order['total'] * $usage_percent / 100.0);
+            }
+        }
+        return $affiliate_discount;
     }
 
     public function checkout($templates) {
