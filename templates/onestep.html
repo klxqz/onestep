@@ -6,6 +6,13 @@
     .onestep-cart * i.icon16 { text-decoration:none!important; vertical-align:top; margin: 0.2em 0.25em 0 0; }
     .onestep-cart .icon16.remove { background-image: url("{$wa_app_static_url}plugins/onestep/img/icons.png"); background-position:-96px 0; background-size: 194px 46px; }
     .onestep-cart .icon16.loading { background-image: url("{$wa_app_static_url}plugins/onestep/img/loading16.gif"); background-position:0 0; }
+
+    /* 32x32 Icons
+-------------- */
+
+    .onestep-cart i.icon32 { background-size: 32px 32px; background-repeat:no-repeat; height:32px; width:32px; display:inline-block; text-indent:-9999px; text-decoration:none!important; }
+    .onestep-cart * i.icon32 { text-decoration:none!important; vertical-align:top; margin: 0.2em 0.25em 0 0; }
+    .onestep-cart .icon32.loading { background-image: url("{$wa_app_static_url}plugins/onestep/img/loading32.gif"); background-position:0 0; }
     /* Misc elements
 ---------------- */
     .onestep-cart .block { padding: 10px; }
@@ -118,7 +125,7 @@
     .onestep-cart .checkout-header h3 a { text-transform: uppercase; text-decoration: none; color: #777; }
     .onestep-cart .checkout-header h3 a:hover { color: #a00 !important; }
     .onestep-cart .checkout-header strong { color: #666; }
-    .onestep-cart .checkout { margin: 20px 70px 50px; border-top: 3px solid #888; box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2) }
+    .onestep-cart .checkout { margin: 20px 70px 50px; border-top: 3px solid #888; box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2); position: relative }
     .onestep-cart .checkout ul.checkout-options { padding-left: 25px; }
     .onestep-cart .checkout ul.checkout-options li { list-style: none; position: relative; margin-bottom: 50px; clear: both; }
     .onestep-cart .checkout ul.checkout-options li h3 { font-weight: bold; margin-bottom: 10px; }
@@ -193,6 +200,8 @@
         .onestep-cart .checkout table.table td.nowrap { white-space: normal; }
         .onestep-cart .checkout table.table td.nowrap.bold { white-space: nowrap; }
     }
+    .onestep-cart .update-processing { background-color: rgba(0,0,0,0.15); height:100%; position:absolute; width:100%; top:0; left:0; z-index:1; text-align: center; }
+    .onestep-cart .update-processing .loading { position: fixed; }
 </style>
 <script src="{$wa_app_static_url}plugins/onestep/js/jquery.validate.min.js"></script>
 <script type="text/javascript" src="{$cart_js_url}"></script>
@@ -216,103 +225,105 @@
                         <td class="min-width"><a href="{$wa->shop->productUrl($item.product)}" title="{$item.product.name|escape}">{$wa->shop->productImgHtml($item.product, '48x48')}</a></td>
                         <td>
                             <a href="{$wa->shop->productUrl($item.product)}" class="bold">{$item.product.name|escape}</a>
-                        {if $item.sku_name && $item.sku_name != $item.product.name}{$item.sku_name|escape}{/if}
-                        <br /><br />
-                        {if !empty($item.services)}
-                            <div class="services">
-                                {foreach $item.services as $service_id => $s}
-                                    <!-- one option -->
-                                    <div {if !empty($s.id)}data-id="{$s.id}"{/if}>
-                                        <label>
-                                            <input {if !empty($s.id)}checked{/if} type="checkbox" name="services[{$item.id}][]" value="{$service_id}"> {$s.name|escape} {if $s.price && !isset($s.variants)}(<span>+{shop_currency_html($s.price, $s.currency)}</span>){/if}
-                                        </label>
-                                        {if isset($s.variants)}
-                                            <select name="service_variant[{$item.id}][{$service_id}]" {if empty($s.id)}disabled{/if}>
-                                                {foreach $s.variants as $variant_id => $v}
-                                                    <option {if $s.variant_id == $variant_id}selected{/if} value="{$variant_id}">{$v.name|escape} (+{shop_currency($v.price, $s.currency)})</option>
-                                                {/foreach}
-                                            </select>
-                                        {/if}
-                                    </div>
-                                {/foreach}
+                            {if $item.sku_name && $item.sku_name != $item.product.name}
+                                {$item.sku_name|escape}
+                            {/if}
+                            <br /><br />
+                            {if !empty($item.services)}
+                                <div class="services">
+                                    {foreach $item.services as $service_id => $s}
+                                        <!-- one option -->
+                                        <div {if !empty($s.id)}data-id="{$s.id}"{/if}>
+                                            <label>
+                                                <input {if !empty($s.id)}checked{/if} type="checkbox" name="services[{$item.id}][]" value="{$service_id}"> {$s.name|escape} {if $s.price && !isset($s.variants)}(<span>+{shop_currency_html($s.price, $s.currency)}</span>){/if}
+                                            </label>
+                                            {if isset($s.variants)}
+                                                <select name="service_variant[{$item.id}][{$service_id}]" {if empty($s.id)}disabled{/if}>
+                                                    {foreach $s.variants as $variant_id => $v}
+                                                        <option {if $s.variant_id == $variant_id}selected{/if} value="{$variant_id}">{$v.name|escape} (+{shop_currency($v.price, $s.currency)})</option>
+                                                    {/foreach}
+                                                </select>
+                                            {/if}
+                                        </div>
+                                    {/foreach}
 
-                            </div>
-                        {/if}
-                        {if !empty($item.error)}
-                            <script>
-                                $(function () {
-                                    alert({json_encode($item.error)});
-                                });
-                            </script>
-                        {/if}
-                    </td>
-                    <td class="align-center nowrap"><span class="gray">&times;</span> <input type="text" name="quantity[{$item.id}]" value="{$item.quantity}" class="qty{if !empty($item.error)} error{/if}"></td>
-                    <td class="align-center item-total nowrap">{shop_currency_html($item.full_price, true)}</td>
-                    <td><a class="delete" href="#" title="[`Remove from cart`]"><i class="icon16 remove"></i></a></td>
-                </tr>
-            {/foreach}
+                                </div>
+                            {/if}
+                            {if !empty($item.error)}
+                                <script>
+                                    $(function () {
+                                        alert({json_encode($item.error)});
+                                    });
+                                </script>
+                            {/if}
+                        </td>
+                        <td class="align-center nowrap"><span class="gray">&times;</span> <input type="text" name="quantity[{$item.id}]" value="{$item.quantity}" class="qty{if !empty($item.error)} error{/if}"></td>
+                        <td class="align-center item-total nowrap">{shop_currency_html($item.full_price, true)}</td>
+                        <td><a class="delete" href="#" title="[`Remove from cart`]"><i class="icon16 remove"></i></a></td>
+                    </tr>
+                {/foreach}
 
-            <!-- discount coupon -->
-            <tr class="no-border" {if !shopDiscounts::isEnabled('coupons') && !$discount}style="display:none"{/if}>
-                <td colspan="2" class="no-border">
-                    {if shopDiscounts::isEnabled('coupons')}
-                        [`Discount coupon (if you have one)`]:
-                        <input type="text" name="coupon_code" value="{$coupon_code|escape}"> <input type="submit"  value="[`Apply`]">
-                    {/if}
-                </td>
-                <td class="align-center">[`Discount`]</td>
-                <td class="align-center cart-discount nowrap">&minus; {shop_currency_html($discount, true)}</td>
-                <td>&nbsp;</td>
-            </tr>
-
-            {if shopAffiliate::isEnabled() && $affiliate_bonus > 0}
-                <!-- affiliate bonus -->
-                <tr class="no-border">
-                    <td colspan="3" class="no-border">
-                        {sprintf('[`Your current affiliate bonus of %s points allows you to get an additonal discount of up to %s`]', $affiliate_bonus, shop_currency_html(shopAffiliate::convertBonus($affiliate_bonus)))}
-                        {if $use_affiliate}
-                            <a id="cancel-affiliate" href="#">[`Cancel`]</a>
-                        {else}
-                            <input type="submit" name="use_affiliate" value="[`Use bonus`]">
+                <!-- discount coupon -->
+                <tr class="no-border" {if !shopDiscounts::isEnabled('coupons') && !$discount}style="display:none"{/if}>
+                    <td colspan="2" class="no-border">
+                        {if shopDiscounts::isEnabled('coupons')}
+                            [`Discount coupon (if you have one)`]:
+                            <input type="text" name="coupon_code" value="{$coupon_code|escape}"> <input type="submit"  value="[`Apply`]">
                         {/if}
                     </td>
-                    <td class="align-center">&minus; {if $use_affiliate}{shop_currency_html(shopAffiliate::convertBonus($used_affiliate_bonus))}{else}0{/if}</td>
+                    <td class="align-center">[`Discount`]</td>
+                    <td class="align-center cart-discount nowrap">&minus; {shop_currency_html($discount, true)}</td>
                     <td>&nbsp;</td>
                 </tr>
-            {/if}
 
-            <!-- TOTAL -->
-            <tr class="large no-border">
-                <td colspan="3">[`Total`]</td>
-                <td class="cart-total align-center total bold nowrap">{shop_currency_html($cart.total, true)}</td>
-                <td>&nbsp;</td>
-            </tr>
+                {if shopAffiliate::isEnabled() && $affiliate_bonus > 0}
+                    <!-- affiliate bonus -->
+                    <tr class="no-border">
+                        <td colspan="3" class="no-border">
+                            {sprintf('[`Your current affiliate bonus of %s points allows you to get an additonal discount of up to %s`]', $affiliate_bonus, shop_currency_html(shopAffiliate::convertBonus($affiliate_bonus)))}
+                            {if $use_affiliate}
+                                <a id="cancel-affiliate" href="#">[`Cancel`]</a>
+                            {else}
+                                <input type="submit" name="use_affiliate" value="[`Use bonus`]">
+                            {/if}
+                        </td>
+                        <td class="align-center">&minus; {if $use_affiliate}{shop_currency_html(shopAffiliate::convertBonus($used_affiliate_bonus))}{else}0{/if}</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                {/if}
 
-            <!-- checkout -->
-            <tr class="no-border">
-                <td colspan="4">
+                <!-- TOTAL -->
+                <tr class="large no-border">
+                    <td colspan="3">[`Total`]</td>
+                    <td class="cart-total align-center total bold nowrap">{shop_currency_html($cart.total, true)}</td>
+                    <td>&nbsp;</td>
+                </tr>
 
-                    {if shopAffiliate::isEnabled() && !empty($add_affiliate_bonus)}
-                        <em class="affiliate float-right">{sprintf("[`This order will add +%s points to your affiliate bonus.`]", $add_affiliate_bonus)}</em>
-                    {/if}
-                </td>
+                <!-- checkout -->
+                <tr class="no-border">
+                    <td colspan="4">
 
-                <td>&nbsp;</td>
-            </tr>
-        </table>
+                        {if shopAffiliate::isEnabled() && !empty($add_affiliate_bonus)}
+                            <em class="affiliate float-right">{sprintf("[`This order will add +%s points to your affiliate bonus.`]", $add_affiliate_bonus)}</em>
+                        {/if}
+                    </td>
 
-        <!-- plugin hook: 'frontend_cart' -->
-        {* @event frontend_cart.%plugin_id% *}
-        {foreach $frontend_cart as $_}
-            {$_}
-        {/foreach}                    
+                    <td>&nbsp;</td>
+                </tr>
+            </table>
 
-    </form>
+            <!-- plugin hook: 'frontend_cart' -->
+            {* @event frontend_cart.%plugin_id% *}
+            {foreach $frontend_cart as $_}
+                {$_}
+            {/foreach}                    
 
-    <div class="clear-both"></div>
+        </form>
 
-    {include file=$checkout_path}
+        <div class="clear-both"></div>
 
-</div>
+        {include file=$checkout_path}
+
+    </div>
 
 {/if}

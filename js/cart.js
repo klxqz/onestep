@@ -1,108 +1,14 @@
-$(function () {
-
-    function updateCart(data)
-    {
-        $(".cart-total").html(data.total);
-        if (data.discount_numeric) {
-            $(".cart-discount").closest('tr').show();
-        }
-        $(".cart-discount").html('&minus; ' + data.discount);
-        if (data.add_affiliate_bonus) {
-            $(".affiliate").show().html(data.add_affiliate_bonus);
-        } else {
-            $(".affiliate").hide();
-        }
-    }
-
-// add to cart block: services
-    $(".services input:checkbox").click(function () {
-        var obj = $('select[name="service_variant[' + $(this).closest('tr').data('id') + '][' + $(this).val() + ']"]');
-        if (obj.length) {
-            if ($(this).is(':checked')) {
-                obj.removeAttr('disabled');
-            } else {
-                obj.attr('disabled', 'disabled');
-            }
-        }
-    });
-    $(".cart a.delete").click(function () {
-        var tr = $(this).closest('tr');
-        $.post('delete/', {html: 1, id: tr.data('id')}, function (response) {
-            if (response.data.count == 0) {
-                location.reload();
-            }
-            tr.remove();
-            updateCart(response.data);
-        }, "json");
-        return false;
-    });
-    $(".cart input.qty").change(function () {
-        var that = $(this);
-        if (that.val() > 0) {
-            var tr = that.closest('tr');
-            if (that.val()) {
-                $.post('save/', {html: 1, id: tr.data('id'), quantity: that.val()}, function (response) {
-                    tr.find('.item-total').html(response.data.item_total);
-                    if (response.data.q) {
-                        that.val(response.data.q);
-                    }
-                    if (response.data.error) {
-                        alert(response.data.error);
-                    } else {
-                        that.removeClass('error');
-                    }
-                    updateCart(response.data);
-                }, "json");
-            }
-        } else {
-            that.val(1);
-        }
-    });
-    $(".cart .services input:checkbox").change(function () {
-        var div = $(this).closest('div');
-        var tr = $(this).closest('tr');
-        if ($(this).is(':checked')) {
-            var parent_id = $(this).closest('tr').data('id')
-            var data = {html: 1, parent_id: parent_id, service_id: $(this).val()};
-            var variants = $('select[name="service_variant[' + parent_id + '][' + $(this).val() + ']"]');
-            if (variants.length) {
-                data['service_variant_id'] = variants.val();
-            }
-            $.post('add/', data, function (response) {
-                div.data('id', response.data.id);
-                tr.find('.item-total').html(response.data.item_total);
-                updateCart(response.data);
-            }, "json");
-        } else {
-            $.post('delete/', {html: 1, id: div.data('id')}, function (response) {
-                div.data('id', null);
-                tr.find('.item-total').html(response.data.item_total);
-                updateCart(response.data);
-            }, "json");
-        }
-    });
-    $(".cart .services select").change(function () {
-        var tr = $(this).closest('tr');
-        $.post('save/', {html: 1, id: $(this).closest('div').data('id'), 'service_variant_id': $(this).val()}, function (response) {
-            tr.find('.item-total').html(response.data.item_total);
-            updateCart(response.data);
-        }, "json");
-    });
-    $("#cancel-affiliate").click(function () {
-        $(this).closest('form').append('<input type="hidden" name="use_affiliate" value="0">').submit();
-        return false;
-    })
-});
 (function ($) {
     "use strict";
     $.onestep = {
+        timer_id: null,
         options: {},
         init: function (options) {
+            this.initCart();
             this.options = options;
             this.syncAddresses();
             this.formChange();
             this.formSubmit();
-            this.checkMinOrder();
             this.initContactinfo();
             this.initShipping();
             this.initPayment();
@@ -174,7 +80,6 @@ $(function () {
                     });
                 });
             }
-
         },
         getSelector: function (name) {
             var input_address_fields = ['street', 'city', 'zip', 'region', 'country'];
@@ -205,88 +110,182 @@ $(function () {
         },
         checkMinOrder: function () {
             var self = this;
-            setInterval(function () {
-                if (self.options.total == $('.cart-total').html()) {
-                    return false;
-                }
+            var loading = $('<div class="update-processing"><i class="icon32 loading"></i></div>');
+            loading.appendTo('.onestep-cart .checkout');
+
+            $("form.checkout-form").find('[name=confirmation]').attr('disabled', 'disabled');
+            $("form.checkout-form").find('[type=submit]').attr('disabled', 'disabled');
+            $.post(window.location, $("form.checkout-form").serialize() + '&' + $('.onestep-cart-form').serialize(), function (response) {
                 for (var i in self.options.steps) {
-                    $('.step-' + self.options.steps[i] + ' h2 span.loading').html('<i class="icon16 loading"></i>');
+                    var step = self.options.steps[i];
+                    var html = $(response).find('.step-' + step).html();
+                    $('.step-' + step).html(html);
+                    switch (step) {
+                        case 'contactinfo':
+                            self.initContactinfo();
+                            break;
+                        case 'shipping':
+                            self.initShipping();
+                            break;
+                        case 'payment':
+                            self.initPayment();
+                            break;
+                        case 'confirmation':
+                            self.initConfirmation();
+                            break;
+                    }
                 }
-                $("form.checkout-form").find('[name=confirmation]').attr('disabled', 'disabled');
-                $("form.checkout-form").find('[type=submit]').attr('disabled', 'disabled');
-                $.post(window.location, $("form.checkout-form").serialize() + '&' + $('.onestep-cart-form').serialize(), function (response) {
-                    for (var i in self.options.steps) {
-                        var step = self.options.steps[i];
-                        var html = $(response).find('.step-' + step).html();
-                        $('.step-' + step).html(html);
-                        switch (step) {
-                            case 'contactinfo':
-                                self.initContactinfo();
-                                break;
-                            case 'shipping':
-                                self.initShipping();
-                                break;
-                            case 'payment':
-                                self.initPayment();
-                                break;
-                            case 'confirmation':
-                                self.initConfirmation();
-                                break;
-                        }
-                    }
-                });
-                $.post(self.options.check_url, function (response) {
-                    if (response.data.check) {
-                        $('.checkout').show();
-                        $('.onestep_min_summ').hide();
+                loading.remove();
+            });
+            $.post(self.options.check_url, function (response) {
+                if (response.data.check) {
+                    $('.checkout').show();
+                    $('.onestep_min_summ').hide();
+                } else {
+                    $('.checkout').hide();
+                    $('.onestep_min_summ').show();
+                }
+            }, 'json');
+        },
+        updateCart: function (data)
+        {
+            $(".onestep-cart .cart-total").html(data.total);
+            if (data.discount_numeric) {
+                $(".onestep-cart .cart-discount").closest('tr').show();
+            }
+            $(".onestep-cart.cart-discount").html('&minus; ' + data.discount);
+            if (data.add_affiliate_bonus) {
+                $(".onestep-cart .affiliate").show().html(data.add_affiliate_bonus);
+            } else {
+                $(".onestep-cart .affiliate").hide();
+            }
+            this.checkMinOrder();
+        },
+        initCart: function () {
+            var self = this;
+            $(".onestep-cart .services input:checkbox").click(function () {
+                var obj = $('.onestep-cart select[name="service_variant[' + $(this).closest('tr').data('id') + '][' + $(this).val() + ']"]');
+                if (obj.length) {
+                    if ($(this).is(':checked')) {
+                        obj.removeAttr('disabled');
                     } else {
-                        $('.checkout').hide();
-                        $('.onestep_min_summ').show();
+                        obj.attr('disabled', 'disabled');
                     }
-                }, 'json');
-                self.options.total = $('.cart-total').html();
-            }, 500);
+                }
+            });
+            $(".onestep-cart .cart a.delete").click(function () {
+                var tr = $(this).closest('tr');
+                $.post('delete/', {html: 1, id: tr.data('id')}, function (response) {
+                    if (response.data.count == 0) {
+                        location.reload();
+                    }
+                    tr.remove();
+                    self.updateCart(response.data);
+                }, "json");
+                return false;
+            });
+            $(".onestep-cart .cart input.qty").change(function () {
+                var that = $(this);
+                if (that.val() > 0) {
+                    var tr = that.closest('tr');
+                    if (that.val()) {
+                        $.post('save/', {html: 1, id: tr.data('id'), quantity: that.val()}, function (response) {
+                            tr.find('.item-total').html(response.data.item_total);
+                            if (response.data.q) {
+                                that.val(response.data.q);
+                            }
+                            if (response.data.error) {
+                                alert(response.data.error);
+                            } else {
+                                that.removeClass('error');
+                            }
+                            self.updateCart(response.data);
+                        }, "json");
+                    }
+                } else {
+                    that.val(1);
+                }
+            });
+            $(".onestep-cart .cart .services input:checkbox").change(function () {
+                var div = $(this).closest('div');
+                var tr = $(this).closest('tr');
+                if ($(this).is(':checked')) {
+                    var parent_id = $(this).closest('tr').data('id')
+                    var data = {html: 1, parent_id: parent_id, service_id: $(this).val()};
+                    var variants = $('select[name="service_variant[' + parent_id + '][' + $(this).val() + ']"]');
+                    if (variants.length) {
+                        data['service_variant_id'] = variants.val();
+                    }
+                    $.post('add/', data, function (response) {
+                        div.data('id', response.data.id);
+                        tr.find('.item-total').html(response.data.item_total);
+                        self.updateCart(response.data);
+                    }, "json");
+                } else {
+                    $.post('delete/', {html: 1, id: div.data('id')}, function (response) {
+                        div.data('id', null);
+                        tr.find('.item-total').html(response.data.item_total);
+                        self.updateCart(response.data);
+                    }, "json");
+                }
+            });
+            $(".onestep-cart .cart .services select").change(function () {
+                var tr = $(this).closest('tr');
+                $.post('save/', {html: 1, id: $(this).closest('div').data('id'), 'service_variant_id': $(this).val()}, function (response) {
+                    tr.find('.item-total').html(response.data.item_total);
+                    self.updateCart(response.data);
+                }, "json");
+            });
+            $(".onestep-cart #cancel-affiliate").click(function () {
+                $(this).closest('form').append('<input type="hidden" name="use_affiliate" value="0">').submit();
+                return false;
+            })
         },
         formChange: function () {
             var self = this;
+            $("form.checkout-form").on('focus keypress', 'input:not([name="user_type"],[name="login"],[name="password"],#create-user,[type="checkbox"]),select', function () {
+                clearTimeout(self.timer_id);
+            });
             $("form.checkout-form").on('change', 'input:not([name="user_type"],[name="login"],[name="password"],#create-user,[type="checkbox"]),select', function () {
-                var f = $(this).closest("form.checkout-form");
-                var cur_step = $(this).closest('.checkout-step').data('step');
-                var j = self.options.steps.indexOf(cur_step);
-                $(f).find('[name=confirmation]').attr('disabled', 'disabled');
-                $(f).find('[type=submit]').attr('disabled', 'disabled');
-                $.post(f.attr('action') || window.location, f.serialize() + '&' + $('.onestep-cart-form').serialize(), function (response) {
-                    var j = self.options.steps.indexOf(cur_step);
-                    for (var i in self.options.steps) {
-                        if (i > j) {
-                            var step = self.options.steps[i];
-                            var html = $(response).find('.step-' + step).html();
-                            $('.step-' + step).html(html);
-                            switch (step) {
-                                case 'contactinfo':
-                                    self.initContactinfo();
-                                    break;
-                                case 'shipping':
-                                    self.initShipping();
-                                    break;
-                                case 'payment':
-                                    self.initPayment();
-                                    break;
-                                case 'confirmation':
-                                    self.initConfirmation();
-                                    break;
+                var el = this;
+                clearTimeout(self.timer_id);
+
+                self.timer_id = setTimeout(function () {
+                    var loading = $('<div class="update-processing"><i class="icon32 loading"></i></div>');
+                    loading.appendTo('.onestep-cart .checkout');
+
+                    var f = $(el).closest("form.checkout-form");
+                    var cur_step = $(el).closest('.checkout-step').data('step');
+                    $(f).find('[name=confirmation]').attr('disabled', 'disabled');
+                    $(f).find('[type=submit]').attr('disabled', 'disabled');
+                    $.post(f.attr('action') || window.location, f.serialize() + '&' + $('.onestep-cart-form').serialize(), function (response) {
+                        var j = self.options.steps.indexOf(cur_step);
+                        for (var i in self.options.steps) {
+                            if (i > j) {
+                                var step = self.options.steps[i];
+                                var html = $(response).find('.step-' + step).html();
+                                $('.step-' + step).html(html);
+                                switch (step) {
+                                    case 'contactinfo':
+                                        self.initContactinfo();
+                                        break;
+                                    case 'shipping':
+                                        self.initShipping();
+                                        break;
+                                    case 'payment':
+                                        self.initPayment();
+                                        break;
+                                    case 'confirmation':
+                                        self.initConfirmation();
+                                        break;
+                                }
                             }
                         }
-                    }
-                    $("form.checkout-form").find('[name=confirmation]').removeAttr('disabled');
-                    $("form.checkout-form").find('[type=submit]').removeAttr('disabled');
-                });
-                for (var i in self.options.steps) {
-                    if (i > j) {
-                        $('.step-' + self.options.steps[i] + ' h2 span.loading').html('<i class="icon16 loading"></i>');
-                        $('.step-' + self.options.steps[i]).find('input, select').attr('disabled', 'disabled');
-                    }
-                }
+                        $("form.checkout-form").find('[name=confirmation]').removeAttr('disabled');
+                        $("form.checkout-form").find('[type=submit]').removeAttr('disabled');
+                        loading.remove();
+                    });
+                }, 3000);
 
             });
         },
