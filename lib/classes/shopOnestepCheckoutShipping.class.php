@@ -197,6 +197,10 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout {
             $shipping_address = $address;
         }
 
+        if (!isset($shipping_address['country'])) {
+            $shipping_address['country'] = 'rus';
+        }
+
         if (waRequest::method() == 'post') {
             $shipping_id = waRequest::post('shipping_id');
             $rate_id = waRequest::post('rate_id');
@@ -229,11 +233,17 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout {
                 $shipping_items = $items;
             }
             $m['external'] = ($selected_shipping && $selected_shipping['id'] == $m['id']) ? 0 : $plugin->getProperties('external');
-            if ($m['external']) {
-                $m['rates'] = array();
+
+            if ($plugin->isAllowedAddress($shipping_address)) {
+                if ($m['external']) {
+                    $m['rates'] = array();
+                } else {
+                    $m['rates'] = $plugin->getRates($shipping_items, $shipping_address, array('total_price' => $total));
+                }
             } else {
-                $m['rates'] = $plugin->getRates($shipping_items, $shipping_address, array('total_price' => $total));
+                $m['rates'] = false;
             }
+
             if (is_array($m['rates'])) {
                 if (!isset($currencies[$m['currency']])) {
                     $m['rate'] = 0;
@@ -246,6 +256,7 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout {
                         $r['rate'] = max($r['rate']);
                     }
                 }
+                unset($r);
                 if ($m['rates']) {
                     if (!empty($selected_shipping['rate_id']) && isset($m['rates'][$selected_shipping['rate_id']])) {
                         $rate = $m['rates'][$selected_shipping['rate_id']];
@@ -269,11 +280,26 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout {
                     $m['rate'] = null;
                 }
             } else {
-                unset($methods[$method_id]);
-                continue;
+                $m['hidden'] = 1;
+                //unset($methods[$method_id]);
+                //continue;
             }
 
-            $custom_fields = $this->getCustomFields($method_id, $plugin);
+            // When free shipping coupon is used, display all rates as 0
+            $checkout_data = wa('shop')->getStorage()->read('shop/checkout');
+            if (!empty($checkout_data['coupon_code'])) {
+                empty($cm) && ($cm = new shopCouponModel());
+                $coupon = $cm->getByField('code', $checkout_data['coupon_code']);
+                if ($coupon && $coupon['type'] == '$FS') {
+                    $m['rate'] = 0;
+                    foreach ($m['rates'] as &$r) {
+                        $r['rate'] = 0;
+                    }
+                    unset($r);
+                }
+            }
+
+            $custom_fields = $this->getCustomFields($m['id'], $plugin);
             $custom_html = '';
             foreach ($custom_fields as $c) {
                 $custom_html .= '<div class="wa-field">' . $c . '</div>';
@@ -286,6 +312,12 @@ class shopOnestepCheckoutShipping extends shopOnestepCheckout {
             if ($f) {
                 $m['form'] = $f;
                 $m['form']->setValue($this->getContact());
+                // Make sure there are no more than one address of each type in the form
+                foreach (array('address.shipping') as $fld) {
+                    if (isset($m['form']->values[$fld]) && count($m['form']->values[$fld]) > 1) {
+                        $m['form']->values[$fld] = array(reset($m['form']->values[$fld]));
+                    }
+                }
             }
 
             $methods[$method_id] = $m;

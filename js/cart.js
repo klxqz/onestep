@@ -2,6 +2,7 @@
     "use strict";
     $.onestep = {
         timer_id: null,
+        update_form_disabled: false,
         options: {},
         init: function (options) {
             this.initCart();
@@ -243,10 +244,13 @@
         },
         formChange: function () {
             var self = this;
-            $("form.checkout-form").on('focus keypress', 'input:not([name="user_type"],[name="login"],[name="password"],#create-user,[type="checkbox"]),select', function () {
+            $("form.checkout-form").on('keypress', 'input:not([name="user_type"],[name="login"],[name="password"],#create-user,[type="checkbox"]),select', function () {
                 clearTimeout(self.timer_id);
             });
             $("form.checkout-form").on('change', 'input:not([name="user_type"],[name="login"],[name="password"],#create-user,[type="checkbox"]),select', function () {
+                if (self.update_form_disabled) {
+                    return false;
+                }
                 var el = this;
                 clearTimeout(self.timer_id);
 
@@ -261,25 +265,25 @@
                     $.post(f.attr('action') || window.location, f.serialize() + '&' + $('.onestep-cart-form').serialize(), function (response) {
                         var j = self.options.steps.indexOf(cur_step);
                         for (var i in self.options.steps) {
-                            if (i > j) {
-                                var step = self.options.steps[i];
-                                var html = $(response).find('.step-' + step).html();
-                                $('.step-' + step).html(html);
-                                switch (step) {
-                                    case 'contactinfo':
-                                        self.initContactinfo();
-                                        break;
-                                    case 'shipping':
-                                        self.initShipping();
-                                        break;
-                                    case 'payment':
-                                        self.initPayment();
-                                        break;
-                                    case 'confirmation':
-                                        self.initConfirmation();
-                                        break;
-                                }
+                            //if (i > j) {
+                            var step = self.options.steps[i];
+                            var html = $(response).find('.step-' + step).html();
+                            $('.step-' + step).html(html);
+                            switch (step) {
+                                case 'contactinfo':
+                                    self.initContactinfo();
+                                    break;
+                                case 'shipping':
+                                    self.initShipping();
+                                    break;
+                                case 'payment':
+                                    self.initPayment();
+                                    break;
+                                case 'confirmation':
+                                    self.initConfirmation();
+                                    break;
                             }
+                            //}
                         }
                         $("form.checkout-form").find('[name=confirmation]').removeAttr('disabled');
                         $("form.checkout-form").find('[type=submit]').removeAttr('disabled');
@@ -377,12 +381,15 @@
             $("input[name='user_type']").change();
         },
         externalMethods: function () {
+            var self = this;
             if (this.options.external_methods.length) {
                 $.get(this.options.shipping_url, {
                     shipping_id: this.options.external_methods
                 }, function (response) {
                     for (var shipping_id in response.data) {
+                        self.update_form_disabled = true;
                         $.onestep.responseCallback(shipping_id, response.data[shipping_id]);
+                        self.update_form_disabled = false;
                     }
                 }, "json");
             }
