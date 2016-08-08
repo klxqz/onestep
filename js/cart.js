@@ -255,40 +255,45 @@
                 clearTimeout(self.timer_id);
 
                 self.timer_id = setTimeout(function () {
-                    var loading = $('<div class="update-processing"><i class="icon32 loading"></i></div>');
-                    loading.appendTo('.onestep-cart .checkout');
-
                     var f = $(el).closest("form.checkout-form");
                     var cur_step = $(el).closest('.checkout-step').data('step');
-                    $(f).find('[name=confirmation]').attr('disabled', 'disabled');
-                    $(f).find('[type=submit]').attr('disabled', 'disabled');
-                    $.post(f.attr('action') || window.location, f.serialize() + '&' + $('.onestep-cart-form').serialize(), function (response) {
-                        var j = self.options.steps.indexOf(cur_step);
-                        for (var i in self.options.steps) {
-                            //if (i > j) {
-                            var step = self.options.steps[i];
-                            var html = $(response).find('.step-' + step).html();
-                            $('.step-' + step).html(html);
-                            switch (step) {
-                                case 'contactinfo':
-                                    self.initContactinfo();
-                                    break;
-                                case 'shipping':
-                                    self.initShipping();
-                                    break;
-                                case 'payment':
-                                    self.initPayment();
-                                    break;
-                                case 'confirmation':
-                                    self.initConfirmation();
-                                    break;
+
+                    if (self.options.steps.indexOf(cur_step) != self.options.steps.length - 1
+                            && cur_step != 'payment') {
+                        var loading = $('<div class="update-processing"><i class="icon32 loading"></i></div>');
+                        loading.appendTo('.onestep-cart .checkout');
+                        $(f).find('[name=confirmation]').attr('disabled', 'disabled');
+                        $(f).find('[type=submit]').attr('disabled', 'disabled');
+                        $.post(f.attr('action') || window.location, f.serialize() + '&' + $('.onestep-cart-form').serialize(), function (response) {
+                            var j = self.options.steps.indexOf(cur_step);
+                            self.update_form_disabled = true;
+                            for (var i in self.options.steps) {
+                                if (i > j) {
+                                    var step = self.options.steps[i];
+                                    var html = $(response).find('.step-' + step).html();
+                                    $('.step-' + step).html(html);
+                                    switch (step) {
+                                        case 'contactinfo':
+                                            self.initContactinfo();
+                                            break;
+                                        case 'shipping':
+                                            self.initShipping();
+                                            break;
+                                        case 'payment':
+                                            self.initPayment();
+                                            break;
+                                        case 'confirmation':
+                                            self.initConfirmation();
+                                            break;
+                                    }
+                                }
                             }
-                            //}
-                        }
-                        $("form.checkout-form").find('[name=confirmation]').removeAttr('disabled');
-                        $("form.checkout-form").find('[type=submit]').removeAttr('disabled');
-                        loading.remove();
-                    });
+                            $("form.checkout-form").find('[name=confirmation]').removeAttr('disabled');
+                            $("form.checkout-form").find('[type=submit]').removeAttr('disabled');
+                            loading.remove();
+                            self.update_form_disabled = false;
+                        });
+                    }
                 }, 3000);
 
             });
@@ -387,11 +392,15 @@
                     shipping_id: this.options.external_methods
                 }, function (response) {
                     for (var shipping_id in response.data) {
-                        self.update_form_disabled = true;
                         $.onestep.responseCallback(shipping_id, response.data[shipping_id]);
-                        self.update_form_disabled = false;
                     }
-                }, "json");
+                }, "json").fail(function (response) {
+                    console.log(response);
+                    for (var i in self.options.external_methods) {
+                        var shipping_id = self.options.external_methods[i];
+                        $.onestep.responseCallback(shipping_id, 'Ошибка получения данных');
+                    }
+                });
             }
         },
         shippingOptions: function () {
