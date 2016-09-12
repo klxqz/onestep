@@ -40,11 +40,11 @@
 <ul class="plugin-menu">
     {*<li><a target="_blank" href="http://www.webasyst.ru/store/plugin/shop/onestep/reviews/"><i class="icon16 star"></i>Оставить отзыв о плагине</a></li>*}
     <li><a href="mailto:support@wa-plugins.ru"><i class="icon16 ss pt hammer"></i>Поддержка</a></li>
-    {*<li><a target="_blank" href="http://wa-plugins.ru/"><i class="icon16 ss pt globe"></i>WA-PLUGINS.ru - сайт разработчика</a></li>*}
+        {*<li><a target="_blank" href="http://wa-plugins.ru/"><i class="icon16 ss pt globe"></i>WA-PLUGINS.ru - сайт разработчика</a></li>*}
 </ul>
 
 <div class="fields form">
-    <form action="?plugin=onestep&action=save" method="post" id="plugins-settings-form">
+    <form action="?module=plugins&id=onestep&action=save" method="post" id="plugins-settings-form_">
         {$wa->csrf()}
         <div class="field-group">
             <div class="field">
@@ -68,212 +68,80 @@
                 </div>
                 <div class="value no-shift s-ibutton-checkbox">
                     <input type="hidden" name="shop_onestep[status]" value="0">
-                    <input type="checkbox" class="ibutton-status" name="shop_onestep[status]" value="1"{if $settings.status} checked{/if}>
+                    <input type="checkbox" id="ibutton-status" name="shop_onestep[status]" value="1"{if $settings.status|default:0} checked{/if}>
+                </div>
+            </div>
+        </div>
+        <div class="field-group"{if !$settings.status|default:0} style="display:none"{/if}>
+            <div class="field">
+                <div class="name">
+                    Выберите поселение
+                </div>
+                <div class="value">
+                    <select name="route_hash" id="route-selector">
+                        <option value="0">Общие настройки для всех поселений</option>
+                        {foreach $route_hashs as $route_url => $route_hash}
+                            <option value="{$route_hash}"{if $route_hash == $settings.route_hash|default:0} selected="selected"{/if}>{$route_url}</option>
+                        {/foreach}
+                    </select>
+
                 </div>
             </div>
         </div>
 
+        <div class="field-group"{if !$settings.status|default:0} style="display:none"{/if}>
+            <div class="route-container block double-padded">
 
-        {$tpls = []}
-        {foreach $domain_routes as $domain => $routes}
-            {foreach $routes as $route}
-                {$domain_route = "`$domain`/`$route.url`"}
-                {$domain_hash = md5($domain_route)}
-                {$setting = $domains_settings[$domain_hash]}
-                {$templates = $setting.templates}
-
-                <div class="domain-route"{if empty($settings.status)} style="display:none;"{/if}>
-                    <div class="field-group">
-
-                        <div class="field">
-                            <h2>Поселение: {$domain_route}</h2>
-                            <div class="name">
-                                Статус
-                            </div>
-                            <div class="value">
-                                <input type="hidden" name="domains_settings[{$domain_hash}][status]" value="0">
-                                <input type="checkbox" class="ibutton-status" name="domains_settings[{$domain_hash}][status]" value="1"{if $setting.status} checked{/if}>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="field-group"{if empty($setting.status)} style="display:none;"{/if}>
-
-                        <div class="field">
-                            <div class="name">
-                                Только для ПК
-                            </div>
-                            <div class="value">
-                                <input type="hidden" name="domains_settings[{$domain_hash}][desktop_only]" value="0" />
-                                <input type="checkbox"{if $setting.desktop_only|default:0} checked="checked"{/if} name="domains_settings[{$domain_hash}][desktop_only]" value="1" />
-                                <p class="hint">
-                                    Плагин работает только для настольных компьютеров и отключается для мобильных устройств.<br/> 
-                                    Для мобильных работает стандартная корзина.
-                                </p>
-                            </div>
-                        </div>
-                        <div class="field">
-                            <div class="name">
-                                Адрес страницы
-                            </div>
-                            <div class="value">
-                                <input type="text" name="domains_settings[{$domain_hash}][page_url]" value="{$setting.page_url|escape}" />
-                            </div>
-                        </div>
-
-                        <div class="field">
-                            <div class="name">
-                                Заголовок страницы
-                            </div>
-                            <div class="value">
-                                <input type="text" name="domains_settings[{$domain_hash}][page_title]" value="{$setting.page_title|escape}" />
-                            </div>
-                        </div>
-
-                        <div class="field">
-                            <div class="name">
-                                Минимальная сумма заказа
-                            </div>
-                            <div class="value">
-                                <input type="text" name="domains_settings[{$domain_hash}][min_sum]" value="{$setting.min_sum|escape}"  />
-                            </div>
-                        </div>
-
-                        <div class="field">
-                            <div class="name">
-                                Использовать проверку заполнения обязательных полей формы
-                            </div>
-                            <div class="value">
-                                <input type="hidden" name="domains_settings[{$domain_hash}][validate]" value="0" />
-                                <input type="checkbox" name="domains_settings[{$domain_hash}][validate]" value="1" {if $setting.validate}checked="checked"{/if} />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="field-group"{if empty($setting.status)} style="display:none;"{/if}>
-
-                        <div class="field">
-                            <a class="edit-templates" href="#"><i class="icon16 edit"></i>Шаблоны</a>
-                        </div>
-
-                        <div class="templates-block">
-                            {foreach from=$templates key=key item=template}
-                                {$tpl_type = 'html'}
-                                {if $template.tpl_ext == 'js'}
-                                    {$tpl_type = 'javascript'}
-                                {/if}
-                                {$tpls[] = ['id' => "sf-template-`$key`-`$domain_hash`", 'type' => $tpl_type]}
-                                <div class="field">
-                                    <div class="name">
-                                        {$template.name}<br /><span class="hint">HTML + Smarty</span>
-                                    </div>
-                                    <div class="value no-shift">
-                                        <a class="edit-template" href="#"><i class="icon16 edit"></i>Изменить шаблон</a>
-                                        <div class="template-block">
-                                            <textarea id="sf-template-{$key}-{$domain_hash}"  class="body" name="domains_settings[{$domain_hash}][templates][{$key}][template]">{$template.template|escape}</textarea>
-
-                                            {if $template.change_tpl}
-                                                <p class="gray"><i class="icon16 exclamation"></i>Внимание! Шаблон по умолчанию был изменен</p>
-                                                <input type="checkbox" name="domains_settings[{$domain_hash}][templates][{$key}][reset_tpl]" value="1"  /> - Сбросить изменения, использовать шаблон по умолчанию
-                                            {/if}
-
-                                        </div>
-                                    </div>
-                                </div>
-                            {/foreach}
-                        </div>
-                    </div>
-                    <hr>
-                </div>
-            {/foreach}
-        {/foreach}
-
-
-        <div class="field"{if !$settings.status} style="display:none"{/if}>
-            <div class="value">
-                <input type="checkbox" name="reset" value="1"  /> - Сбросить все изменения
             </div>
         </div>
 
-        <div class="field"{if !$settings.status} style="display:none"{/if}>
-            <div class="value submit">
-                <input type="submit" class="button green" value="Сохранить">
-                <span id="plugins-settings-form-status" style="display:none">
-                    <i style="vertical-align:middle" class="icon16 yes"></i> [`Saved`]
-                </span>
+        <div class="field-group"{if !$settings.status|default:0} style="display:none"{/if}>
+            <h3 class="grey">Расширьте функционал</h3>
+            <div class="field">
+                <div class="name">
+                    Минимальный заказ
+                </div>
+                <div class="value">
+                    <p class="hint">Воспользуйтесь дополнительным плагином <a target="_blank" href="https://www.webasyst.ru/store/plugin/shop/wholesale/">Минимальный заказ</a>, чтобы задать ограничения на минимальную сумму, минимальное количество товаров в заказе и другие ограничения</p>
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">
+                    Маска для номера телефона 
+                </div>
+                <div class="value">
+                    <p class="hint">Воспользуйтесь дополнительным плагином <a target="_blank" href="https://www.webasyst.ru/store/plugin/shop/phmask/">Маска для номера телефона</a>, чтобы задать формат для ввода телефонного номера, например с <strong>+7</strong> или <strong>8</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="field-group"{if !$settings.status|default:0} style="display:none"{/if}>
+            <div class="field">
+                <div class="value submit">
+                    <input type="submit" class="button green" value="Сохранить">
+                    <span id="plugins-settings-form-status" style="display:none">
+                        <i style="vertical-align:middle" class="icon16 yes"></i> [`Saved`]
+                    </span>
+                </div>
             </div>
         </div>
     </form>
 </div>
+
+
+{$tpls = []}
+{foreach $templates as $key => $template}
+    {$mode = $template.tpl_ext}
+    {if $template.tpl_ext == 'js'}
+        {$mode = 'javascript'}
+    {/if}
+    {$tpls[] = ['id' => "sf-template-`$key`", 'mode' => $mode]}
+{/foreach}
+<script type="text/javascript" src="{$wa_app_static_url}plugins/onestep/js/settings.js?{$wa->version()}"></script>
 <script type="text/javascript">
     $(function () {
-        $('.ibutton-status').iButton({
-            labelOn: "", labelOff: "", className: 'mini'
-        }).change(function () {
-            var self = $(this);
-            var enabled = self.is(':checked');
-            if (enabled) {
-                self.closest('.field-group').siblings().show(200);
-            } else {
-                self.closest('.field-group').siblings().hide(200);
-            }
-            var f = $("#plugins-settings-form");
-            $.post(f.attr('action'), f.serialize());
+        $.onestep_settings.init({
+            templates: {json_encode($tpls)}
         });
-        var ids = {json_encode($tpls)};
-        console.log(ids[0]);
-        for (var i = 0; i < ids.length; i++) {
-            var c = CodeMirror.fromTextArea(document.getElementById(ids[i].id), {
-                mode: "text/" + ids[i].type,
-                tabMode: "indent",
-                height: "dynamic",
-                lineWrapping: true
-            });
-            $(ids[i].id).change(function () {
-                c.setValue($(this).val())
-            });
-            $(ids[i].id).submit(function () {
-                var f = $(this);
-                $.post(f.attr('action'), f.serialize(), function (response) {
-                    if (response.status == 'ok') {
-                        $('#wa-design-button').removeClass('red').addClass('green');
-                        $("#wa-editor-status-fail").hide()
-                        $("#wa-editor-status-ok span").html(response.data.message);
-                        $("#wa-editor-status-ok").fadeIn('slow', function () {
-                            $(this).fadeOut(1000);
-                        });
-                    } else {
-                        $('#wa-design-button').removeClass('green').addClass('red');
-                        $("#wa-editor-status-ok").hide();
-                        $("#wa-editor-status-fail span").html(response.errors.join(', '));
-                        $("#wa-editor-status-fail").fadeIn('slow');
-                    }
-                }, "json")
-                return false;
-            });
-        }
-        $('.template-block').hide();
-        $('.edit-template').click(function () {
-            var template = $(this).closest('.field').find('.template-block');
-            if (template.is(':visible')) {
-                template.hide();
-            } else {
-                template.show();
-            }
-            return false;
-
-        });
-
-        $('.templates-block').hide();
-        $('.edit-templates').click(function () {
-            var block = $(this).parent().next('.templates-block');
-            if (block.is(':visible')) {
-                block.hide();
-            } else {
-                block.show();
-            }
-            return false;
-        });
-
     });
 </script>

@@ -2,74 +2,123 @@
 
 class shopOnestepPlugin extends shopPlugin {
 
-    protected static $steps = array();
-    public static $plugin_id = array('shop', 'onestep');
-    public static $default_settings = array(
-        'status' => 1,
-        'page_url' => 'onestep/',
-        'page_title' => 'Корзина',
-        'desktop_only' => 0,
-        'min_sum' => 0,
-        'validate' => 1,
-        'templates' => array(
-            'onestep' => array(
-                'name' => 'Главный шаблон',
-                'tpl_path' => 'plugins/onestep/templates/',
-                'tpl_name' => 'onestep',
-                'tpl_ext' => 'html',
-                'public' => false,
-            ),
-            'checkout' => array(
-                'name' => 'Шаблон оформления заказа (checkout.html)',
-                'tpl_path' => 'plugins/onestep/templates/',
-                'tpl_name' => 'checkout',
-                'tpl_ext' => 'html',
-                'public' => false
-            ),
-            'cart_js' => array(
-                'name' => 'cart.js',
-                'tpl_path' => 'plugins/onestep/js/',
-                'tpl_name' => 'cart',
-                'tpl_ext' => 'js',
-                'public' => true
-            ),
-            'checkout.contactinfo' => array(
-                'name' => 'Шаблон оформления заказа - Контактная информация (checkout.contactinfo.html)',
-                'tpl_path' => 'plugins/onestep/templates/',
-                'tpl_name' => 'checkout.contactinfo',
-                'tpl_ext' => 'html',
-                'public' => false
-            ),
-            'checkout.shipping' => array(
-                'name' => 'Шаблон оформления заказа - Доставка (checkout.shipping.html)',
-                'tpl_path' => 'plugins/onestep/templates/',
-                'tpl_name' => 'checkout.shipping',
-                'tpl_ext' => 'html',
-                'public' => false
-            ),
-            'checkout.payment' => array(
-                'name' => 'Шаблон оформления заказа - Оплата (checkout.payment.html)',
-                'tpl_path' => 'plugins/onestep/templates/',
-                'tpl_name' => 'checkout.payment',
-                'tpl_ext' => 'html',
-                'public' => false
-            ),
-            'checkout.confirmation' => array(
-                'name' => 'Шаблон оформления заказа - Подтверждение (checkout.confirmation.html)',
-                'tpl_path' => 'plugins/onestep/templates/',
-                'tpl_name' => 'checkout.confirmation',
-                'tpl_ext' => 'html',
-                'public' => false
-            ),
-        )
+    public static $templates = array(
+        'onestep' => array(
+            'name' => 'Главный шаблон',
+            'tpl_path' => 'plugins/onestep/templates/',
+            'tpl_name' => 'onestep',
+            'tpl_ext' => 'html',
+            'public' => false,
+        ),
+        'checkout' => array(
+            'name' => 'Шаблон оформления заказа (checkout.html)',
+            'tpl_path' => 'plugins/onestep/templates/',
+            'tpl_name' => 'checkout',
+            'tpl_ext' => 'html',
+            'public' => false
+        ),
+        'onestep_css' => array(
+            'name' => 'onestep.css',
+            'tpl_path' => 'plugins/onestep/css/',
+            'tpl_name' => 'onestep',
+            'tpl_ext' => 'css',
+            'public' => true
+        ),
+        'onestep_js' => array(
+            'name' => 'onestep.js',
+            'tpl_path' => 'plugins/onestep/js/',
+            'tpl_name' => 'onestep',
+            'tpl_ext' => 'js',
+            'public' => true
+        ),
+        'checkout.contactinfo' => array(
+            'name' => 'Шаблон оформления заказа - Контактная информация (checkout.contactinfo.html)',
+            'tpl_path' => 'plugins/onestep/templates/',
+            'tpl_name' => 'checkout.contactinfo',
+            'tpl_ext' => 'html',
+            'public' => false
+        ),
+        'checkout.shipping' => array(
+            'name' => 'Шаблон оформления заказа - Доставка (checkout.shipping.html)',
+            'tpl_path' => 'plugins/onestep/templates/',
+            'tpl_name' => 'checkout.shipping',
+            'tpl_ext' => 'html',
+            'public' => false
+        ),
+        'checkout.payment' => array(
+            'name' => 'Шаблон оформления заказа - Оплата (checkout.payment.html)',
+            'tpl_path' => 'plugins/onestep/templates/',
+            'tpl_name' => 'checkout.payment',
+            'tpl_ext' => 'html',
+            'public' => false
+        ),
+        'checkout.confirmation' => array(
+            'name' => 'Шаблон оформления заказа - Подтверждение (checkout.confirmation.html)',
+            'tpl_path' => 'plugins/onestep/templates/',
+            'tpl_name' => 'checkout.confirmation',
+            'tpl_ext' => 'html',
+            'public' => false
+        ),
     );
 
+    public function saveSettings($settings = array()) {
+        $route_hash = waRequest::post('route_hash');
+        $route_settings = waRequest::post('route_settings');
+
+        if ($routes = $this->getSettings('routes')) {
+            $settings['routes'] = $routes;
+        } else {
+            $settings['routes'] = array();
+        }
+        $settings['routes'][$route_hash] = $route_settings;
+        $settings['route_hash'] = $route_hash;
+        parent::saveSettings($settings);
+
+
+        $templates = waRequest::post('templates');
+        foreach ($templates as $template_id => $template) {
+            $s_template = self::$templates[$template_id];
+            if (!empty($template['reset_tpl'])) {
+                $tpl_full_path = $s_template['tpl_path'] . $route_hash . '.' . $s_template['tpl_name'] . '.' . $s_template['tpl_ext'];
+                $template_path = wa()->getDataPath($tpl_full_path, $s_template['public'], 'shop', true);
+                @unlink($template_path);
+            } else {
+                $tpl_full_path = $s_template['tpl_path'] . $route_hash . '.' . $s_template['tpl_name'] . '.' . $s_template['tpl_ext'];
+                $template_path = wa()->getDataPath($tpl_full_path, $s_template['public'], 'shop', true);
+                if (!file_exists($template_path)) {
+                    $tpl_full_path = $s_template['tpl_path'] . $s_template['tpl_name'] . '.' . $s_template['tpl_ext'];
+                    $template_path = wa()->getAppPath($tpl_full_path, 'shop');
+                }
+                $content = file_get_contents($template_path);
+                if (!empty($template['template']) && $template['template'] != $content) {
+                    $tpl_full_path = $s_template['tpl_path'] . $route_hash . '.' . $s_template['tpl_name'] . '.' . $s_template['tpl_ext'];
+                    $template_path = wa()->getDataPath($tpl_full_path, $s_template['public'], 'shop', true);
+                    $f = fopen($template_path, 'w');
+                    if (!$f) {
+                        throw new waException('Не удаётся сохранить шаблон. Проверьте права на запись ' . $template_path);
+                    }
+                    fwrite($f, $template['template']);
+                    fclose($f);
+                }
+            }
+        }
+    }
+
     public function frontendHead($param) {
-        $domain_settings = shopOnestep::getDomainSettings();
+        if (!$this->getSettings('status')) {
+            return false;
+        }
+        if (shopOnestepHelper::getRouteSettings(null, 'status')) {
+            $route_settings = shopOnestepHelper::getRouteSettings();
+        } elseif (shopOnestepHelper::getRouteSettings(0, 'status')) {
+            $route_settings = shopOnestepHelper::getRouteSettings(0);
+        } else {
+            return false;
+        }
 
         if (
-                !(waRequest::isMobile() && !empty($domain_settings['desktop_only'])) &&
-                $this->getSettings('status') && $domain_settings['status'] &&
+                !(waRequest::isMobile() && !empty($route_settings['desktop_only'])) &&
+                $this->getSettings('status') && $route_settings['status'] &&
                 wa()->getRouting()->getCurrentUrl() != 'checkout/success/' &&
                 wa()->getRouting()->getCurrentUrl() != 'checkout/error/' &&
                 (wa()->getRouting()->getCurrentUrl() == 'cart/' || preg_match('@^checkout/@i', wa()->getRouting()->getCurrentUrl()))
@@ -80,21 +129,27 @@ class shopOnestepPlugin extends shopPlugin {
     }
 
     public function routing($route = array()) {
-        $domain_settings = shopOnestep::getDomainSettings();
+        if (!$this->getSettings('status')) {
+            return;
+        }
 
-        $page_url = $domain_settings['page_url'];
+        if (shopOnestepHelper::getRouteSettings(null, 'status')) {
+            $route_settings = shopOnestepHelper::getRouteSettings();
+        } elseif (shopOnestepHelper::getRouteSettings(0, 'status')) {
+            $route_settings = shopOnestepHelper::getRouteSettings(0);
+        } else {
+            return;
+        }
+
+        $page_url = $route_settings['page_url'];
         $page_url = rtrim($page_url, '/') . "/";
         return array(
             $page_url => 'frontend/onestep',
-            'onestepcheck/' => 'frontend/check',
-            $page_url . 'save/' => 'frontend/save',
-            $page_url . 'delete/' => 'frontend/delete',
-            $page_url . 'add/' => 'frontend/add',
+            $page_url . 'save/' => 'frontend/cartSave',
+            $page_url . 'delete/' => 'frontend/cartDelete',
+            $page_url . 'add/' => 'frontend/cartAdd',
+            $page_url . 'shipping/' => 'frontend/shipping',
         );
-    }
-
-    public static function display() {
-        return false;
     }
 
 }

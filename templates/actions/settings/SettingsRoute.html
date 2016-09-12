@@ -1,0 +1,91 @@
+<div class="field-group">
+    <div class="field">
+        <div class="name">
+            Статус плагина для поселения
+        </div>
+        <div class="value no-shift s-ibutton-checkbox">
+            <input type="hidden" name="route_settings[status]" value="0">
+            <input type="checkbox" class="ibutton" name="route_settings[status]" value="1"{if $route_settings.status|default:0} checked{/if}>
+        </div>
+    </div>
+</div>
+
+<div class="field-group">
+    <div class="field">
+        <div class="name">
+            Только для ПК
+        </div>
+        <div class="value">
+            <input type="hidden" name="route_settings[desktop_only]" value="0" />
+            <input type="checkbox"{if $route_settings.desktop_only|default:0} checked="checked"{/if} name="route_settings[desktop_only]" value="1" />
+            <p class="hint">
+                Плагин работает только для настольных компьютеров и отключается для мобильных устройств.<br/> 
+                Для мобильных работает стандартная корзина.
+            </p>
+        </div>
+    </div>
+    <div class="field">
+        <div class="name">
+            Шаблон
+        </div>
+        <div class="value">
+            <input class="long" type="text" name="route_settings[page_template]" value="{$route_settings.page_template|default:'page.html'|escape}" />
+            <p class="hint">Шаблон темы дизайна, который использует плагин для вывода информации</p>
+        </div>
+    </div>
+    <div class="field">
+        <div class="name">
+            Адрес страницы
+        </div>
+        <div class="value">
+            <input type="text" name="route_settings[page_url]" value="{$route_settings.page_url|default:'onestep/'|escape}" />
+        </div>
+    </div>
+
+    <div class="field">
+        <div class="name">
+            Заголовок страницы
+        </div>
+        <div class="value">
+            <input type="text" name="route_settings[page_title]" value="{$route_settings.page_title|default:'Корзина'|escape}" />
+        </div>
+    </div>
+    <div class="field">
+        <div class="name">
+            Использовать проверку заполнения обязательных полей формы
+        </div>
+        <div class="value">
+            <input type="hidden" name="route_settings[validate]" value="0" />
+            <input type="checkbox" name="route_settings[validate]" value="1" {if $route_settings.validate|default:1}checked="checked"{/if} />
+        </div>
+    </div>
+</div>
+
+<div class="field-group">
+
+    <div class="field">
+        <a class="edit-templates" href="#"><i class="icon16 edit"></i>Шаблоны</a>
+    </div>
+
+    <div class="templates-block">
+        {foreach $templates as $key => $template}
+            <div class="field">
+                <div class="name">
+                    {$template.name}<br /><span class="hint">HTML + Smarty</span>
+                </div>
+                <div class="value no-shift">
+                    <a class="edit-template" href="#"><i class="icon16 edit"></i>Изменить шаблон</a>
+                    <div class="template-block">
+                        <textarea id="sf-template-{$key}"  class="body" name="templates[{$key}][template]">{$template.template|escape}</textarea>
+
+                        {if $template.change_tpl}
+                            <p class="gray"><i class="icon16 exclamation"></i>Внимание! Шаблон по умолчанию был изменен</p>
+                            <input type="checkbox" name="templates[{$key}][reset_tpl]" value="1"  /> - Сбросить изменения, использовать шаблон по умолчанию
+                        {/if}
+
+                    </div>
+                </div>
+            </div>
+        {/foreach}
+    </div>
+</div>

@@ -1,228 +1,30 @@
-<style>
-
-    /* 16x16 Icons
--------------- */
-    .onestep-cart i.icon16 { background-repeat:no-repeat; height:16px; width:16px; display:inline-block; text-indent:-9999px; text-decoration:none!important; }
-    .onestep-cart * i.icon16 { text-decoration:none!important; vertical-align:top; margin: 0.2em 0.25em 0 0; }
-    .onestep-cart .icon16.remove { background-image: url("{$wa_app_static_url}plugins/onestep/img/icons.png"); background-position:-96px 0; background-size: 194px 46px; }
-    .onestep-cart .icon16.loading { background-image: url("{$wa_app_static_url}plugins/onestep/img/loading16.gif"); background-position:0 0; }
-
-    /* 32x32 Icons
--------------- */
-
-    .onestep-cart i.icon32 { background-size: 32px 32px; background-repeat:no-repeat; height:32px; width:32px; display:inline-block; text-indent:-9999px; text-decoration:none!important; }
-    .onestep-cart * i.icon32 { text-decoration:none!important; vertical-align:top; margin: 0.2em 0.25em 0 0; }
-    .onestep-cart .icon32.loading { background-image: url("{$wa_app_static_url}plugins/onestep/img/loading32.gif"); background-position:0 0; }
-    /* Misc elements
----------------- */
-    .onestep-cart .block { padding: 10px; }
-    .onestep-cart .inline-link { text-decoration: none !important; }
-    .onestep-cart .inline-link b { border-bottom: 1px dotted; font-weight: normal; position: relative; top: -0.13em;}
-    .onestep-cart .inline-link b i { font-style: normal; position: relative; top: 0.13em;}
-    .onestep-cart .small { font-size: 0.9em; }
-    .onestep-cart .large { font-size: 1.2em; }
-    .onestep-cart .bold { font-weight: bold; }
-    .onestep-cart .highlighted { background:  #ffc; }
-    .onestep-cart .hint { color: #aaa; font-size: 0.9em; }
-    .onestep-cart .hint a,
-    .onestep-cart .hint:visited,
-    .onestep-cart .hint a:visited { color: #aaa; }
-    .onestep-cart .gray { color: #aaa; }
-    .onestep-cart .float-left { float: left; }
-    .onestep-cart .float-right { float: right; }
-    .onestep-cart .align-left { text-align: left; }
-    .onestep-cart .align-center { text-align: center; }
-    .onestep-cart .align-right { text-align: right; }
-    .onestep-cart .clear-left { clear: left; }
-    .onestep-cart .clear-right { clear: right; }
-    .onestep-cart .clear-both { clear: both; }
-    .onestep-cart .shadowed { -moz-box-shadow: 0 5px 15px #aaa; -webkit-box-shadow: 0 5px 15px #aaa; box-shadow: 0 5px 15px #aaa; }
-    .onestep-cart .nowrap { white-space: nowrap; }
-    /* Menus
--------- */
-    .onestep-cart ul.menu-v { margin: 0 0 20px -6px; padding: 0; }
-    .onestep-cart ul.menu-v li { list-style: none; padding: 0; margin: 3px 0 8px; line-height: 1.1em; }
-    .onestep-cart ul.menu-v li a { padding: 5px 6px; display: block;}
-    .onestep-cart ul.menu-v li.selected a { color: #000; text-decoration: none; background: #eee; }
-    .onestep-cart ul.menu-v li.selected ul li a { background: inherit; color: #03c; text-decoration: underline; }
-    .onestep-cart ul.menu-v li ul.menu-v { margin-left: 10px; margin-top: 5px; margin-bottom: 15px; }
-    .onestep-cart ul.menu-v li ul.menu-v li a { padding: 2px 6px; font-size: 0.9em; }
-    .onestep-cart ul.menu-v li ul.menu-v li ul.menu-v li a { font-size: 0.8em; }
-    .onestep-cart ul.menu-h { margin: 0 0 15px; padding: 0; }
-    .onestep-cart ul.menu-h li { list-style: none; display: inline-block; padding: 0 10px 0 0; display:block\9; float:left\9; /* ie8 hack */ }
-    .onestep-cart ul.menu-h li a { display: inline-block; padding: 0px 5px; display:block\9; float:left\9; /* ie8 hack */ }
-    .onestep-cart ul.menu-h li a img.icon16 { position: relative; top: 3px; left: -3px; }
-    .onestep-cart ul.menu-h li a i.icon16 { margin-top: 0em; }
-    .onestep-cart ul.menu-h li.selected a { color: #000; text-decoration: none; background: #eee; }
-    .onestep-cart ul.menu-h li.selected ul * { background: #fff !important; }
-    .onestep-cart .dropdown .popup { display: none; background: #eee; box-shadow: 0 4px 7px -5px rgba(0, 0, 0, 0.4); padding: 20px; min-width: 150px; font-size: 115%; }
-    .onestep-cart .dropdown:hover .popup { display: block; position: absolute; z-index: 1312; }
-    /* Sign up & Login forms
-    ------------------------ */
-    .onestep-cart .wa-auth-adapters ul { padding: 0; min-height: 16px; }
-    .onestep-cart .wa-auth-adapters ul li { list-style: none; float: left; padding: 0 15px 0 0; }
-    .onestep-cart .wa-auth-adapters ul li a { display: block; padding: 0px 5px; }
-    .onestep-cart .wa-auth-adapters ul li a img { position: relative; top: 3px; left: -3px; }
-    .onestep-cart .wa-auth-adapters p { clear: left; color: #888; font-size: 0.9em; width: 40%; }
-    .onestep-cart .wa-form { float: left; margin: 10px 0; overflow: visible; }
-    .onestep-cart .wa-form .wa-field { clear: left; margin: 0; padding-top: 3px; }
-    .onestep-cart .wa-form .wa-field .wa-name { float: left; width: 155px; padding-top: 0.05em; padding-bottom: 10px; font-size: 0.95em; }
-    .onestep-cart .wa-form .wa-field.wa-separator { height: 10px; }
-    .onestep-cart .wa-form .wa-field .wa-value { margin-left: 180px; margin-bottom: 5px; position: relative; }
-    .onestep-cart .wa-form .wa-field .wa-value input.wa-error { border: 2px solid red; }
-    .onestep-cart .wa-form .wa-field .wa-value .wa-error-msg { font-size: 0.9em; color: red; display: block; }
-    .onestep-cart .wa-form .wa-field .wa-value input[type="text"],
-    .onestep-cart .wa-form .wa-field .wa-value input[type="email"],
-    .onestep-cart .wa-form .wa-field .wa-value input[type="password"] { width: 30%; min-width: 260px;  margin:0;}
-    .onestep-cart .wa-form .wa-field .wa-value textarea { min-width: 300px; height: 70px; }
-    .onestep-cart .wa-form .wa-field .wa-value input.wa-captcha-input { width: 100px; min-width: 0; }
-    .onestep-cart .wa-form .wa-field .wa-value label { display: block; }
-    .onestep-cart .wa-form .wa-field .wa-value .wa-captcha img { margin-left: 0; }
-    .onestep-cart .wa-form .wa-field .wa-value .errormsg { margin-left: 0; }
-    .onestep-cart .wa-form .wa-field .wa-value.wa-submit { margin-top: 10px; }
-    .onestep-cart .wa-form .wa-field .wa-value p label { display: block; margin: 0; }
-    .onestep-cart .wa-form .wa-field .wa-value p { line-height: 1.6em; margin-bottom: 23px; position: relative; } 
-    .onestep-cart .wa-form .wa-field .wa-value p span { color: #777; font-size: 0.9em; display: block; }
-    .onestep-cart .wa-form .wa-field .wa-value p i.icon16 { float: left; left: -20px; margin-top: 2px; position: absolute; }
-    .onestep-cart .wa-form .wa-field .wa-value p input { display: block; margin-bottom: 2px; }
-    .onestep-cart .wa-form .wa-field .wa-value p input[type="radio"],
-    .onestep-cart .wa-form .wa-field .wa-value p input[type="checkbox"] { display: inline; }
-    .onestep-cart .wa-form .wa-field .wa-value p .field.wa-required span:after { content: " *"; color: #faa; }
-    .onestep-cart .wa-form .wa-field.wa-required .wa-name:after { content: " *"; color: #faa; }
-    .onestep-cart .wa-captcha { padding: 7px 0 10px; }
-    .onestep-cart .wa-captcha p { clear: left; margin: 0; }
-    .onestep-cart .wa-captcha strong { font-size: 1.2em; }
-    .onestep-cart .wa-captcha p img { float: left !important; margin-right: 5px; margin-top: -8px; }
-    .onestep-cart .wa-captcha .wa-captcha-refresh { font-size: 0.8em; text-decoration: underline; color: #aaa; }
-    .onestep-cart .wa-captcha .wa-captcha-input { display: inline !important; }
-    .onestep-cart .wa-captcha .errormsg { display: inline; margin-left: 10px; }
-    .onestep-cart input.error, .onestep-cart textarea.error { border: 2px solid red; }
-    .onestep-cart .errormsg { color: red; margin-left: 170px; display: block; }
-    .onestep-cart table.table { margin-top: 25px; margin-left: -10px; width: 100%; border-spacing:0; border-collapse:collapse; }
-    .onestep-cart table.table th { padding-left: 7px; padding-right: 7px; }
-    .onestep-cart table.table td { padding: 15px 7px; border-bottom: 1px solid #ddd; }
-    .onestep-cart table.table td.min-width { width: 1%; }
-    .onestep-cart table.table td p { margin: 0; }
-    .onestep-cart table.table td input.numerical { width: 50px; margin-right: 5px; text-align: right; }
-    .onestep-cart table.table tr.no-border td { border: none; }
-    .onestep-cart table.table tr.thin td { padding-top: 13px; padding-bottom: 0; }
-    .onestep-cart table.table tr.service td { padding-top: 5px; padding-bottom: 5px; padding-left: 25px; font-size: 0.8em; color: #555; }
-    .onestep-cart table.table { margin: 20px 0; }
-    .onestep-cart table.table .image { margin-right: 10px; width: 48px; }
-    .onestep-cart table.table .badge { font-size: 0.8em; width: 24px; height: 24px; padding: 3px 3px 4px; border: 0; }
-    .onestep-cart table.table .badge span { display: block; width: 20px; overflow: hidden; padding-top: 6px; padding-left: 3px; }
-    .onestep-cart table.cart td { vertical-align: top; padding: 20px 7px 25px; }
-    .onestep-cart table.cart td input.qty { max-width: 50px; text-align: right; }
-    .onestep-cart table.cart td.total { font-size: 1.3em; }
-    .onestep-cart .options { line-height: 1.8em; }
-    .onestep-cart .services { margin-bottom: 20px; }
-    .onestep-cart table.features { border-spacing: 0; border-collapse: collapse; }
-    .onestep-cart table.features td { padding: 5px 0 2px; }
-    .onestep-cart table.features td.name { min-width: 145px; color: #777; vertical-align: top; }
-    .onestep-cart table.features tr.divider td { border-bottom: 1px solid #ccc; padding-left: 0; padding-top: 15px; padding-bottom: 0; }
-    /* Checkout */
-    .onestep-cart .checkout-header { margin: 0 90px; color: #999; }
-    .onestep-cart .checkout-header h3 a { text-transform: uppercase; text-decoration: none; color: #777; }
-    .onestep-cart .checkout-header h3 a:hover { color: #a00 !important; }
-    .onestep-cart .checkout-header strong { color: #666; }
-    .onestep-cart .checkout { margin: 20px 70px 50px; border-top: 3px solid #888; box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2); position: relative }
-    .onestep-cart .checkout ul.checkout-options { padding-left: 25px; }
-    .onestep-cart .checkout ul.checkout-options li { list-style: none; position: relative; margin-bottom: 50px; clear: both; }
-    .onestep-cart .checkout ul.checkout-options li h3 { font-weight: bold; margin-bottom: 10px; }
-    .onestep-cart .checkout ul.checkout-options li h3 label { margin-right: 10px; }
-    .onestep-cart .checkout ul.checkout-options li .rate { float: right; text-align: center; width: 250px; }
-    .onestep-cart .checkout ul.checkout-options li p { width: 70%; }
-    .onestep-cart .checkout ul.checkout-options li input[type="radio"] { position: absolute; top: 4px; left: -25px; }
-    .onestep-cart .checkout ul.checkout-options li label input[type="radio"] { top: 4px; left: -20px; }
-    .onestep-cart .checkout ul.checkout-options li img.method-logo { position: relative; float: left; margin-right: 10px; top: -6px; left: 0px; /* adjusted for default 60x32-px logos */ }
-    .onestep-cart .checkout ul.checkout-options li .wa-form { margin-top: 0px; margin-bottom: 30px; }
-    .onestep-cart .checkout ul.checkout-options li .wa-form label input[type="radio"] { position: static; }
-    .onestep-cart .checkout .checkout-result { padding: 80px 0 60px; background: #fff; text-align: center; }
-    .onestep-cart .checkout .checkout-result h1 { font-size: 4em; margin-bottom: 50px; }
-    .onestep-cart .checkout .checkout-result.error h1 { color: red; }
-    .onestep-cart .checkout .checkout-result .wa-form { margin: 10px auto 20px; width: 400px; float: none; text-align: left; }
-    .onestep-cart .checkout .checkout-result .back { margin-top: 50px; }
-    .onestep-cart .checkout .checkout-step { padding: 0; border: 3px solid #888; border-top: 0; }
-    .onestep-cart .checkout .checkout-step h2 { padding: 17px 20px 15px; text-transform: uppercase; font-weight: bold; background: #eee; margin: 0; }
-    .onestep-cart .checkout .checkout-step h2 a { text-decoration: none; color: #000; }
-    .onestep-cart .checkout .checkout-step h2 a:hover { color: #a00 !important; }
-    .onestep-cart .checkout .checkout-step h2.upcoming a:hover { color: #000 !important; cursor: default; }
-    .onestep-cart .checkout .checkout-step h2 a.hint { font-size: 0.5em; color: #aaa; text-decoration: underline; }
-    .onestep-cart .checkout .checkout-step-content { padding: 20px; background: #fff; }
-    .onestep-cart .checkout .checkout-step ul.menu-v { margin-left: 0; margin-top: 20px; }
-    .onestep-cart .checkout .checkout-step #login-form h1 { display: none; }
-    .onestep-cart .checkout .checkout-step input.large { font-size: 1.4em; }
-    .onestep-cart .checkout .comment { width: 100%; height: 100px; margin-bottom: 20px; }
-    .onestep-cart .checkout blockquote img { margin-right: 20px; float: left; }
-    .onestep-cart .checkout blockquote p { margin-bottom: 10px; }
-    .onestep-cart .checkout blockquote p span { color: #000; }
-    .onestep-cart .checkout .errormsg.inline { display: inline; margin-left: 10px; }
-    .onestep-cart .checkout .checkout-step h3{ color: #000; }
-    .onestep-cart .error { color: #a33; }
-
-    @media screen and (max-width: 760px) {
-        .onestep-cart table.cart td { padding: 7px 2px 10px; display: inline-block; border: 0; }
-        .onestep-cart table.cart td img { display: none; }
-        .onestep-cart table.cart td input[type="text"] { min-width: 0; }
-        .onestep-cart table.cart td br { display: none; }
-        .onestep-cart table.cart td a.bold { margin-top: 20px; font-size: 1.3em; }
-        .onestep-cart table.cart td .services { margin-bottom: 0; }
-
-        .onestep-cart .wa-form .wa-field .wa-name { float: none; padding-bottom: 0; }
-        .onestep-cart .wa-form .wa-field .wa-value { margin-left: 0; }
-        .onestep-cart .wa-form .wa-field .wa-value p span { display: block; }
-        .onestep-cart .wa-form .wa-field .wa-value input[type="text"],
-        .onestep-cart .wa-form .wa-field .wa-value input[type="email"],
-        .onestep-cart .wa-form .wa-field .wa-value input[type="password"],
-        .onestep-cart .wa-form .wa-field .wa-value select{ min-width: 200px; max-width: 80%; }
-
-        .onestep-cart .wa-auth-adapters p { width: 100%; }
-
-        .onestep-cart .checkout { margin: 0 0 30px; }
-        .onestep-cart .checkout ul.checkout-options li { width: 100%; }
-        .onestep-cart .checkout ul.checkout-options li img { display: none; }
-        .onestep-cart .checkout ul.checkout-options li .rate { min-width: 0; width: auto; max-width: 150px; }
-        .onestep-cart .checkout ul.checkout-options li .rate.error { padding-top: 5px; }
-        .onestep-cart .checkout ul.checkout-options li .rate .hint { display: none; }
-        .onestep-cart .checkout ul.checkout-options li .wa-form.wa-address p { font-size: 1em; }
-        .onestep-cart .checkout .checkout-step h2 { font-size: 1.2em; padding: 10px 10px 10px; }
-        .onestep-cart .checkout .checkout-step h2 a.hint { display: none !important; }
-        .onestep-cart .checkout .checkout-step input.large { margin: 0 auto; display: block; }
-        .onestep-cart .checkout .checkout-step-content { padding: 10px 10px 30px; }
-        .onestep-cart .checkout .checkout-step-content.auth ul.menu-v li { padding: 5px 0; }
-        .onestep-cart .checkout .checkout-result h1 { font-size: 2.5em; }
-        .onestep-cart .checkout-header { margin: 10px; font-size: 0.8em; text-align: center; }
-        .onestep-cart .checkout-header .float-right { display: none; }
-        .onestep-cart .checkout li .wa-form { margin-left: -25px; }
-        .onestep-cart .checkout table.table th,
-        .onestep-cart .checkout table.table td { font-size: 0.75em; }
-        .onestep-cart .checkout table.table td .gray { display: none; }
-        .onestep-cart .checkout table.table td.nowrap { white-space: normal; }
-        .onestep-cart .checkout table.table td.nowrap.bold { white-space: nowrap; }
-    }
-    .onestep-cart .update-processing { background-color: rgba(0,0,0,0.05); height:100%; position:absolute; width:100%; top:0; left:0; z-index:1; text-align: center; }
-    .onestep-cart .update-processing .loading { position: fixed; }
-</style>
+<link href="{$onestep_css_url}" rel="stylesheet" type="text/css" />
 <script src="{$wa_app_static_url}plugins/onestep/js/jquery.validate.min.js"></script>
-<script type="text/javascript" src="{$cart_js_url}"></script>
+<script type="text/javascript" src="{$onestep_js_url}"></script>
 
 {if !$cart.count}
 
-    <h1>[`Shopping cart`]</h1>
     <p>[`Your shopping cart is empty.`]</p>
 
 {else}
     <!-- general welcome text -->
     <div class="onestep-cart">
 
-        <h1>[`Shopping cart`]</h1>
 
         <form method="post" class="onestep-cart-form">
             <table width="100%" class="table cart">
                 <!-- products -->
                 {foreach $cart.items as $item}
                     <tr data-id="{$item.id}">
-                        <td class="min-width"><a href="{$wa->shop->productUrl($item.product)}" title="{$item.product.name|escape}">{$wa->shop->productImgHtml($item.product, '48x48')}</a></td>
+                        <td class="min-width">
+                            <a href="{$wa->shop->productUrl($item.product)}" title="{$item.product.name|escape}">
+                                {if !empty($item.product.image_id)}
+                                    {$wa->shop->productImgHtml($item.product, '48x48', ['itemprop' => 'image', 'alt' => $item.name])}
+                                {else}
+                                    <img src="{$wa_app_static_url}img/image-dummy-small.png" class="not-found" style="width: 48px; height: 48px;">
+                                {/if}
+                            </a>
+                        </td>
                         <td>
                             <a href="{$wa->shop->productUrl($item.product)}" class="bold">{$item.product.name|escape}</a>
                             {if $item.sku_name && $item.sku_name != $item.product.name}
@@ -259,7 +61,7 @@
                         </td>
                         <td class="align-center nowrap"><span class="gray">&times;</span> <input type="text" name="quantity[{$item.id}]" value="{$item.quantity}" class="qty{if !empty($item.error)} error{/if}"></td>
                         <td class="align-center item-total nowrap">{shop_currency_html($item.full_price, true)}</td>
-                        <td><a class="delete" href="#" title="[`Remove from cart`]"><i class="icon16 remove"></i></a></td>
+                        <td class="align-center"><a class="delete" href="#" title="[`Remove from cart`]"><i class="icon16 remove"></i></a></td>
                     </tr>
                 {/foreach}
 
@@ -271,7 +73,7 @@
                             <input type="text" name="coupon_code" value="{$coupon_code|escape}"> <input type="submit"  value="[`Apply`]">
                         {/if}
                     </td>
-                    <td class="align-center">[`Discount`]</td>
+                    <td class="align-right">[`Discount`]</td>
                     <td class="align-center cart-discount nowrap">&minus; {shop_currency_html($discount, true)}</td>
                     <td>&nbsp;</td>
                 </tr>
@@ -294,22 +96,21 @@
 
                 <!-- TOTAL -->
                 <tr class="large no-border">
-                    <td colspan="3">[`Total`]</td>
+                    <td colspan="2"></td>
+                    <td class="align-right">[`Total`]</td>
                     <td class="cart-total align-center total bold nowrap">{shop_currency_html($cart.total, true)}</td>
                     <td>&nbsp;</td>
                 </tr>
 
                 <!-- checkout -->
-                <tr class="no-border">
-                    <td colspan="4">
-
-                        {if shopAffiliate::isEnabled() && !empty($add_affiliate_bonus)}
+                {if shopAffiliate::isEnabled() && !empty($add_affiliate_bonus)}
+                    <tr class="no-border">
+                        <td colspan="4">
                             <em class="affiliate float-right">{sprintf("[`This order will add +%s points to your affiliate bonus.`]", $add_affiliate_bonus)}</em>
-                        {/if}
-                    </td>
-
-                    <td>&nbsp;</td>
-                </tr>
+                        </td>
+                        <td>&nbsp;</td>
+                    </tr>
+                {/if}
             </table>
 
             <!-- plugin hook: 'frontend_cart' -->
