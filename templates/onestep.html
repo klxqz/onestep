@@ -70,7 +70,7 @@
                     <td colspan="2" class="no-border">
                         {if shopDiscounts::isEnabled('coupons')}
                             [`Discount coupon (if you have one)`]:
-                            <input type="text" name="coupon_code" value="{$coupon_code|escape}"> <input type="submit"  value="[`Apply`]">
+                            <input type="text" name="coupon_code" value="{$coupon_code|escape}"> <input type="submit" name="apply_coupon_code"  value="[`Apply`]">
                         {/if}
                     </td>
                     <td class="align-right">[`Discount`]</td>

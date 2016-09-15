@@ -78,7 +78,7 @@ class shopOnestepPlugin extends shopPlugin {
         $templates = waRequest::post('templates');
         foreach ($templates as $template_id => $template) {
             $s_template = self::$templates[$template_id];
-            if (!empty($template['reset_tpl'])) {
+            if (!empty($template['reset_tpl']) || waRequest::post('reset_tpl_all')) {
                 $tpl_full_path = $s_template['tpl_path'] . $route_hash . '.' . $s_template['tpl_name'] . '.' . $s_template['tpl_ext'];
                 $template_path = wa()->getDataPath($tpl_full_path, $s_template['public'], 'shop', true);
                 @unlink($template_path);
@@ -90,7 +90,7 @@ class shopOnestepPlugin extends shopPlugin {
                     $template_path = wa()->getAppPath($tpl_full_path, 'shop');
                 }
                 $content = file_get_contents($template_path);
-                if (!empty($template['template']) && $template['template'] != $content) {
+                if (!empty($template['template']) && strcmp(str_replace("\r", "", $template['template']), str_replace("\r", "", $content)) != 0) {
                     $tpl_full_path = $s_template['tpl_path'] . $route_hash . '.' . $s_template['tpl_name'] . '.' . $s_template['tpl_ext'];
                     $template_path = wa()->getDataPath($tpl_full_path, $s_template['public'], 'shop', true);
                     $f = fopen($template_path, 'w');

@@ -80,6 +80,11 @@
         initConfirmation: function () {
 
         },
+        updateCheckoutCode: function (response) {
+            if ($('.checkout-form .step-contactinfo [name=checkout_code]').next('script').length) {
+                $('.checkout-form .step-contactinfo [name=checkout_code]').next('script').replaceWith('<script type="text/javascript">' + $(response).find('[name=checkout_code]').next('script').html() + '</script>');
+            }
+        },
         addressChange: function () {
             var self = this;
             $(".wa-address").find('input,select').change(function () {
@@ -376,6 +381,7 @@
                 this.jqxhr.abort();
             }
             $('.checkout-step h2 i.loading').remove();
+            $('.checkout-form .please-wait').remove();
         },
         reloadSteps: function (steps) {
             if (steps !== undefined) {
@@ -428,6 +434,7 @@
                                 break;
                         }
                     }
+                    self.updateCheckoutCode(response);
                     $("form.checkout-form").find('[name=confirmation]').removeAttr('disabled');
                     $("form.checkout-form").find('#checkout-btn').removeAttr('disabled');
                     self.jqxhr = null;

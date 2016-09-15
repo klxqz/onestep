@@ -80,12 +80,20 @@
 
                         {if $template.change_tpl}
                             <p class="gray"><i class="icon16 exclamation"></i>Внимание! Шаблон по умолчанию был изменен</p>
-                            <input type="checkbox" name="templates[{$key}][reset_tpl]" value="1"  /> - Сбросить изменения, использовать шаблон по умолчанию
+                            <input class="reset-tpl" type="checkbox" name="templates[{$key}][reset_tpl]" value="1"  /> - Сбросить изменения, использовать шаблон по умолчанию
                         {/if}
 
                     </div>
                 </div>
             </div>
         {/foreach}
+        <div class="field">
+            <div class="name">
+                Сбросить изменения во всех шаблонах
+            </div>
+            <div class="value">
+                <input type="checkbox" name="reset_tpl_all" value="1" />
+            </div>
+        </div>
     </div>
 </div>

@@ -4,7 +4,13 @@
             {$wa->authAdapters()}
         {/if}
         <div class="wa-form">
-            {$checkout_contact_form->html()}
+            {if !$wa->post('confirmation')}
+                {*$with_errors = false*}
+                {$checkout_contact_form->html(null, false)}
+            {else}
+                {*$with_errors = true*}
+                {$checkout_contact_form->html()} 
+            {/if}
             {if $wa->isAuthEnabled() && !$wa->user()->isAuth()}
                 <div class="wa-field">
                     <div class="wa-value">

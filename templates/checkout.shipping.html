@@ -53,7 +53,17 @@
                         {/if}
                     </h3>
                     {if $m.description}<p>{$m.description}</p>{/if}
-                    {if !empty($m.form)}<div class="wa-form wa-address" {if $m.id != $shipping.id}style="display:none"{/if}>{$m.form->html()}</div>{/if}
+                    {if !empty($m.form)}
+                        <div class="wa-form wa-address" {if $m.id != $shipping.id}style="display:none"{/if}>
+                            {if !$wa->post('confirmation')}
+                                {*$with_errors = false*}
+                                {$m.form->html(null, false)}
+                            {else}
+                                {*$with_errors = true*}
+                                {$m.form->html()} 
+                            {/if}
+                        </div>
+                    {/if}
                     {if !empty($m.custom_html)}
                         <div class="clear-both"></div>
                         <div class="wa-form" {if $m.id != $shipping.id}style="display:none"{/if}>{$m.custom_html}</div>

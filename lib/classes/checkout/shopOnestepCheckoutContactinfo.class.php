@@ -31,7 +31,7 @@ class shopOnestepCheckoutContactinfo extends shopCheckoutContactinfo {
     }
 
     protected function sendSpamAlert() {
-        if ($this->setSessionData('sendSpamAlert')) {
+        if ($this->getSessionData('sendSpamAlert')) {
             return;
         }
         parent::sendSpamAlert();

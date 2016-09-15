@@ -65,6 +65,6 @@
     $.onestep.init({
         shipping_url: "{$wa->getUrl('/frontend/shipping',['plugin' => 'onestep'])}",
         validate: {intval($settings.validate)},
-        submit: {if !empty($submit)}1{else}0{/if}
-            });
+        submit: {intval($wa->post('confirmation'))}
+    });
 </script>

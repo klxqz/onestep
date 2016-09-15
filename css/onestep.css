@@ -40,6 +40,7 @@
 -------- */
 .onestep-cart ul.menu-v { margin: 0 0 20px -6px; padding: 0; }
 .onestep-cart ul.menu-v li { list-style: none; padding: 0; margin: 3px 0 8px; line-height: 1.1em; border: none; }
+.onestep-cart ul.menu-v li label{ color: black; }
 .onestep-cart ul.menu-v li a { padding: 5px 6px; display: block;}
 .onestep-cart ul.menu-v li.selected a { color: #000; text-decoration: none; background: #eee; }
 .onestep-cart ul.menu-v li.selected ul li a { background: inherit; color: #03c; text-decoration: underline; }

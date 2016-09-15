@@ -22,7 +22,7 @@ class shopOnestepPluginFrontendCheckoutAction extends shopFrontendCheckoutAction
             return false;
         }
 
-        if (waRequest::method() == 'post') {
+        if (waRequest::method() == 'post' && !waRequest::post('apply_coupon_code')) {
             if (waRequest::post('wa_auth_login')) {
                 $login_action = new shopOnestepLoginAction();
                 $login_action->run();
@@ -42,7 +42,6 @@ class shopOnestepPluginFrontendCheckoutAction extends shopFrontendCheckoutAction
                     }
                 }
             }
-            $this->view->assign('submit', true);
         }
         $checkout_tpls = array();
         foreach ($steps as $step_id => $step) {
