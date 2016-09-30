@@ -128,7 +128,7 @@
 .onestep-cart .checkout ul.checkout-options { padding-left: 25px; }
 .onestep-cart .checkout ul.checkout-options li { list-style: none; position: relative; margin-bottom: 50px; clear: both; }
 .onestep-cart .checkout ul.checkout-options li h3 { font-weight: bold; margin-bottom: 10px; }
-.onestep-cart .checkout ul.checkout-options li h3 label { margin-right: 10px; }
+.onestep-cart .checkout ul.checkout-options li h3 label { margin-right: 10px; margin-left: 0px; }
 .onestep-cart .checkout ul.checkout-options li .rate { float: right; text-align: center; width: 250px; }
 .onestep-cart .checkout ul.checkout-options li p { width: 70%; }
 .onestep-cart .checkout ul.checkout-options li input[type="radio"] { position: absolute; top: 4px; left: -25px; }

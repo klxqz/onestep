@@ -79,7 +79,7 @@ class shopOnestepHelper {
         if ($route === null) {
             $route = self::getCurrentRouteHash();
         }
-        $routes = wa()->getPlugin('onestep')->getSettings('routes');
+        $routes = wa('shop')->getPlugin('onestep')->getSettings('routes');
         if (!empty($routes[$route])) {
             $route_settings = $routes[$route];
         } else {
