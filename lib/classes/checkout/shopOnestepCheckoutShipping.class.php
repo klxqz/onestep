@@ -137,7 +137,7 @@ class shopOnestepCheckoutShipping extends shopCheckoutShipping {
                 $fields = $config_address['fields'];
                 if ($address_fields) {
                     foreach ($fields as $f_id => $f) {
-                        if (isset($address_fields[$f_id])) {
+                        if (!empty($address_fields[$f_id]) && is_array($address_fields[$f_id])) {
                             foreach ($address_fields[$f_id] as $k => $v) {
                                 $fields[$f_id][$k] = $v;
                             }
