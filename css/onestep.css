@@ -100,7 +100,7 @@
 .onestep-cart table.table { margin-top: 25px; margin-left: -10px; width: 100%; border-spacing:0; border-collapse:collapse; }
 .onestep-cart table.table th { padding-left: 7px; padding-right: 7px; }
 .onestep-cart table.table td { padding: 15px 7px; border-bottom: 1px solid #ddd; }
-.onestep-cart table.table td.min-width { width: 1%; }
+.onestep-cart table.table td.min-width { width: 1%; min-width: 48px; }
 .onestep-cart table.table td p { margin: 0; }
 .onestep-cart table.table td input.numerical { width: 50px; margin-right: 5px; text-align: right; }
 .onestep-cart table.table tr.no-border td { border: none; }
@@ -200,3 +200,4 @@
     .onestep-cart .checkout table.table td.nowrap.bold { white-space: nowrap; }
 }
 .onestep-cart  .please-wait i.icon16 { vertical-align: middle; }
+.onestep-cart label input[type="radio"] { opacity: 1; }

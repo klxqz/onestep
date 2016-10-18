@@ -3,7 +3,7 @@
 class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
 
     public function execute() {
-        
+
         $plugin = wa()->getPlugin('onestep');
         if (!$plugin->getSettings('status')) {
             throw new waException(_ws("Page not found"), 404);
@@ -18,11 +18,12 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
             throw new waException(_ws("Page not found"), 404);
         }
 
-        $checkout_action = new shopOnestepPluginFrontendCheckoutAction();
-        $checkout_action->run();
 
         $cart_action = new shopFrontendCartAction();
         $cart_action->run();
+
+        $checkout_action = new shopOnestepPluginFrontendCheckoutAction();
+        $checkout_action->run();
 
         $this->view->assign('onestep_css_url', shopOnestepHelper::getRouteTemplateUrl('onestep_css'));
         $this->view->assign('onestep_js_url', shopOnestepHelper::getRouteTemplateUrl('onestep_js'));

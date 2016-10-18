@@ -121,7 +121,7 @@ class shopOnestepPlugin extends shopPlugin {
                 $this->getSettings('status') && $route_settings['status'] &&
                 wa()->getRouting()->getCurrentUrl() != 'checkout/success/' &&
                 wa()->getRouting()->getCurrentUrl() != 'checkout/error/' &&
-                (wa()->getRouting()->getCurrentUrl() == 'cart/' || preg_match('@^checkout/@i', wa()->getRouting()->getCurrentUrl()))
+                (((empty($route_settings['mode']) || $route_settings['mode'] != 'only_checkout') &&  wa()->getRouting()->getCurrentUrl() == 'cart/') || preg_match('@^checkout/@i', wa()->getRouting()->getCurrentUrl()))
         ) {
             $onestep_url = wa()->getRouteUrl('shop/frontend/onestep');
             wa()->getResponse()->redirect($onestep_url);

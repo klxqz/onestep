@@ -6,11 +6,25 @@
         <div class="value no-shift s-ibutton-checkbox">
             <input type="hidden" name="route_settings[status]" value="0">
             <input type="checkbox" class="ibutton" name="route_settings[status]" value="1"{if $route_settings.status|default:0} checked{/if}>
+            <p class="hint">Чтобы плагин работал для выбранного поселения необходимо задать "ВКЛ"</p>
         </div>
     </div>
 </div>
 
 <div class="field-group">
+    <div class="field">
+        <div class="name">
+            Режим
+        </div>
+        <div class="value">
+            <input type="radio" name="route_settings[mode]" value=""{if $route_settings.mode|default:'' == ''} checked="checked"{/if} /> - корзина и оформление заказа
+            <p class="hint">Плагин работает вместо стандартной корзины и всех шагов оформления заказа</p>
+        </div>
+        <div class="value">
+            <input type="radio" name="route_settings[mode]" value="only_checkout"{if $route_settings.mode|default:'' == 'only_checkout'} checked="checked"{/if} /> - только оформление заказа
+            <p class="hint">Плагин работает вместо оформления заказа, стандартная страница корзины плагином не изменяется</p>
+        </div>
+    </div>
     <div class="field">
         <div class="name">
             Только для ПК
