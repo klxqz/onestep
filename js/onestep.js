@@ -20,6 +20,7 @@
                 this.errorScroll();
             }
             this.initKeyUp();
+            this.reloadSteps(['confirmation']);
         },
         errorScroll: function () {
             if ($('.checkout-step .error:visible').length) {
@@ -359,7 +360,7 @@
             if (data.discount_numeric) {
                 $(".onestep-cart .cart-discount").closest('tr').show();
             }
-            $(".onestep-cart.cart-discount").html('&minus; ' + data.discount);
+            $(".onestep-cart .cart-discount").html('&minus; ' + data.discount);
             if (data.add_affiliate_bonus) {
                 $(".onestep-cart .affiliate").show().html(data.add_affiliate_bonus);
             } else {

@@ -35,13 +35,16 @@ class shopOnestepPluginFrontendCheckoutAction extends shopFrontendCheckoutAction
                     }
                 }
 
-                if (waRequest::post('confirmation') && !$error && !$this->checkCart($cart)) {
-                    if ($order_id = $this->createOrder()) {
-                        wa()->getStorage()->set('shop/success_order_id', $order_id);
-                        wa()->getResponse()->redirect(wa()->getRouteUrl('/frontend/checkout', array('step' => 'success')));
+                if (waRequest::post('confirmation') && !$error) {
+                    if (!$this->checkCart($r_cart)) {
+                        if ($order_id = $this->createOrder()) {
+                            wa()->getStorage()->set('shop/success_order_id', $order_id);
+                            wa()->getResponse()->redirect(wa()->getRouteUrl('/frontend/checkout', array('step' => 'success')));
+                        }
+                    } else {
+                        $this->view->assign('cart', $r_cart);
                     }
                 }
-                $this->view->assign('cart', $cart);
             }
         }
         $checkout_tpls = array();

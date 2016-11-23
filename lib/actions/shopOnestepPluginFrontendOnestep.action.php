@@ -25,8 +25,8 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
         $checkout_action = new shopOnestepPluginFrontendCheckoutAction();
         $checkout_action->run();
 
-        $this->view->assign('onestep_css_url', shopOnestepHelper::getRouteTemplateUrl('onestep_css'));
-        $this->view->assign('onestep_js_url', shopOnestepHelper::getRouteTemplateUrl('onestep_js'));
+        $this->view->assign('onestep_css_url', shopOnestepHelper::getRouteTemplateUrl('onestep_css', $route_hash));
+        $this->view->assign('onestep_js_url', shopOnestepHelper::getRouteTemplateUrl('onestep_js', $route_hash));
 
         $checkout_template = shopOnestepHelper::getRouteTemplates($route_hash, 'checkout', false);
         $this->view->assign('checkout_path', $checkout_template['template_path']);
