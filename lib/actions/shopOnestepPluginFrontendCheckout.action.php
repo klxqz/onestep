@@ -75,7 +75,7 @@ class shopOnestepPluginFrontendCheckoutAction extends shopFrontendCheckoutAction
         return self::$steps[$step_id];
     }
 
-    public static function checkCart(&$cart = null) {
+    public function checkCart(&$cart = null) {
         $error = false;
         $cart = new shopCart();
         $code = $cart->getCode();
@@ -154,6 +154,7 @@ class shopOnestepPluginFrontendCheckoutAction extends shopFrontendCheckoutAction
         $order_id = parent::createOrder($errors);
         if ($order_id) {
             $this->setSessionData('sendSpamAlert', 0);
+            wa()->getStorage()->set('shop/checkout_code', '');
         }
         return $order_id;
     }

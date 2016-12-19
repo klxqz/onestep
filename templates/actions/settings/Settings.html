@@ -34,15 +34,24 @@
     ul.setting-links li a:hover{
         color: #000 !important;
     }
+    .field-group.fixed{
+        width: calc(100% - 253px);
+        position: fixed;
+        background: #fff;
+        z-index: 99;
+        margin: 0;
+        bottom: 0;
+    }
 </style>
-<h1>Заказ на одной странице</h1>
+{$settings = $plugin->getSettings()}
+<h1>{$plugin->getName()}</h1>
 
 <ul class="plugin-menu">
     <li><a href="http://support.wa-plugins.ru/"><i class="icon16 ss pt hammer"></i>Поддержка</a></li>
 </ul>
 
 <div class="fields form">
-    <form action="?module=plugins&id=onestep&action=save" method="post" id="plugins-settings-form_">
+    <form action="?module=plugins&id=onestep&action=save" method="post" id="plugins-settings-form">
         {$wa->csrf()}
         <div class="field-group">
             <div class="field">
@@ -100,6 +109,9 @@
                     Минимальный заказ
                 </div>
                 <div class="value">
+                    <a target="_blank" href="https://www.webasyst.ru/store/plugin/shop/wholesale/">
+                        <img src="{$plugin->getPluginStaticUrl()}img/wholesale.png" />
+                    </a>
                     <p class="hint">Воспользуйтесь дополнительным плагином <a target="_blank" href="https://www.webasyst.ru/store/plugin/shop/wholesale/">Минимальный заказ</a>, чтобы задать ограничения на минимальную сумму, минимальное количество товаров в заказе и другие ограничения</p>
                 </div>
             </div>
@@ -108,12 +120,15 @@
                     Маска для номера телефона 
                 </div>
                 <div class="value">
+                    <a target="_blank" href="https://www.webasyst.ru/store/plugin/shop/phmask/">
+                        <img src="{$plugin->getPluginStaticUrl()}img/phmask.png" />
+                    </a>
                     <p class="hint">Воспользуйтесь дополнительным плагином <a target="_blank" href="https://www.webasyst.ru/store/plugin/shop/phmask/">Маска для номера телефона</a>, чтобы задать формат для ввода телефонного номера, например с <strong>+7</strong> или <strong>8</strong></p>
                 </div>
             </div>
         </div>
 
-        <div class="field-group"{if !$settings.status|default:0} style="display:none"{/if}>
+        <div class="field-group submit"{if !$settings.status|default:0} style="display:none"{/if}>
             <div class="field">
                 <div class="value submit">
                     <input type="submit" class="button green" value="Сохранить">

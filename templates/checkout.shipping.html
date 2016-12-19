@@ -1,5 +1,5 @@
 <div class="checkout-content" data-step-id="shipping">
-    <ul class="checkout-options">
+    <ul class="checkout-options shipping">
         {foreach $checkout_shipping_methods as $m}
             {if empty($m.hidden)}
                 <li class="shipping-{$m.id}">

@@ -5,14 +5,21 @@
             this.options = options;
             this.initButtons();
             this.initRouteSelector();
-            this.initSave();
+            this.initScroll();
             return this;
         },
-        initSave: function () {
-            $(document).off('submit', '#plugins-settings-form_').on('submit', '#plugins-settings-form_', function () {
-                $.plugins.saveHandlerAjax('#plugins-settings-form_');
-                return false;
-            });
+        initScroll: function () {
+            $(window).scroll(function () {
+                var item = $('.field-group.submit');
+                var form_bottom_position = $('#plugins-settings-form').offset().top + $('#plugins-settings-form').height();
+                var scroll_bottom = $(this).scrollTop() + $(window).height();
+                if (form_bottom_position - scroll_bottom > 120 && !item.hasClass("fixed")) {
+                    item.hide();
+                    item.addClass("fixed").slideToggle(200);
+                } else if (form_bottom_position - scroll_bottom < 100 && item.hasClass("fixed")) {
+                    item.removeClass("fixed");
+                }
+            }).scroll();
         },
         initButtons: function () {
             $('#ibutton-status').iButton({
@@ -25,7 +32,7 @@
                 } else {
                     self.closest('.field-group').siblings().hide(200);
                 }
-                var f = $("#plugins-settings-form_");
+                var f = $("#plugins-settings-form");
                 $.post(f.attr('action'), f.serialize());
             });
             $(document).on('click', '.helper-link', function () {
@@ -33,7 +40,13 @@
                 $(this).find('i.icon10').toggleClass('darr-tiny').toggleClass('uarr-tiny');
                 return false;
             });
-
+            $(document).keydown(function (e) {
+                // ctrl + s
+                if (e.ctrlKey && e.keyCode == 83) {
+                    $('#plugins-settings-form').submit();
+                    return false;
+                }
+            });
 
         },
         initRouteSelector: function () {
@@ -65,8 +78,6 @@
                             lineWrapping: true
                         });
                     }
-                    $.onestep_settings.initSave();
-
 
                     $('.template-block').hide();
                     $('.edit-template').click(function () {
