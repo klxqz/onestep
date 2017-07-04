@@ -47,6 +47,7 @@ class shopOnestepPluginFrontendCheckoutAction extends shopFrontendCheckoutAction
                 }
             }
         }
+        $this->view->assign('checkout_steps', $steps);
         $checkout_tpls = array();
         foreach ($steps as $step_id => $step) {
             $step = $this->getStep($step_id);
@@ -57,14 +58,13 @@ class shopOnestepPluginFrontendCheckoutAction extends shopFrontendCheckoutAction
              */
             $event_params = array('step' => $step_id);
             $this->view->assign('frontend_checkout', wa()->event('frontend_checkout', $event_params));
-
+            
             $step_tpl_path = $templates['checkout.' . $step_id]['template_path'];
 
             $step_tpl = $this->view->fetch($step_tpl_path);
             $checkout_tpls[$step_id] = $step_tpl;
         }
         $this->view->assign('checkout_tpls', $checkout_tpls);
-        $this->view->assign('checkout_steps', $steps);
     }
 
     protected function getStep($step_id) {

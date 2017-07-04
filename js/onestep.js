@@ -15,6 +15,15 @@
             this.auth();
             if (this.options.validate) {
                 this.valide();
+                $("form.checkout-form").submit(function () {
+                    if ($(this).valid()) {
+                        $('#checkout-btn').attr('disabled', true);
+                    }
+                });
+            } else {
+                $("form.checkout-form").submit(function () {
+                    $('#checkout-btn').attr('disabled', true);
+                });
             }
             if (this.options.submit) {
                 this.errorScroll();
@@ -31,13 +40,25 @@
         },
         valide: function () {
             $("form.checkout-form").validate({
+                errorPlacement: function (error, element) {
+                    if ($(element).closest('label').length) {
+                        $(element).closest('label').after(error);
+                    } else {
+                        $(element).after(error);
+                    }
+                },
+                errorElement: "div",
                 rules: {
                     terms: {
+                        required: true
+                    },
+                    service_agreement: {
                         required: true
                     }
                 },
                 messages: {
-                    terms: "Это поле обязательное для заполнения"
+                    terms: "Это поле обязательное для заполнения",
+                    service_agreement: "Это поле обязательное для заполнения"
                 }
             });
             $('form.checkout-form .wa-required input:visible').each(function () {
@@ -54,9 +75,10 @@
             var self = this;
             $('#checkout-contact-form input:not([type="checkbox"]),#checkout-contact-form select').change(function () {
                 if ($(this).closest('#create-user-div').length || $(this).attr('name') == 'customer[phone]' || $(this).attr('name') == 'customer[email]') {
-                    return false;
+                    //return false;
+                } else {
+                    self.reloadSteps(['shipping', 'payment', 'confirmation']);
                 }
-                self.reloadSteps(['shipping', 'payment', 'confirmation']);
             });
         },
         initShipping: function () {
