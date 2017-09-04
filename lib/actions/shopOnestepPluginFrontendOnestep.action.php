@@ -18,6 +18,11 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
             throw new waException(_ws("Page not found"), 404);
         }
 
+        if (waRequest::param('ssl') && !waRequest::isHttps()) {
+            $url = 'https://' . waRequest::server('HTTP_HOST') . wa()->getConfig()->getCurrentUrl();
+            wa()->getResponse()->redirect($url, 301);
+            return true;
+        }
 
         $cart_action = new shopFrontendCartAction();
         $cart_action->run();
@@ -45,6 +50,7 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
             'content' => $html,
         ));
         $this->setThemeTemplate($route_settings['page_template']);
+        waSystem::popActivePlugin();
     }
 
     protected function checkCart() {

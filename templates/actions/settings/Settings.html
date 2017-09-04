@@ -150,7 +150,7 @@
     {/if}
     {$tpls[] = ['id' => "sf-template-`$key`", 'mode' => $mode]}
 {/foreach}
-<script type="text/javascript" src="{$wa_app_static_url}plugins/onestep/js/settings.js?{$wa->version()}"></script>
+<script type="text/javascript" src="{$wa_app_static_url}plugins/onestep/js/settings.js?{$plugin->getVersion()}"></script>
 <script type="text/javascript">
     $(function () {
         $.onestep_settings.init({

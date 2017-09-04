@@ -75,7 +75,10 @@
                             mode: "text/" + templates[i].mode,
                             tabMode: "indent",
                             height: "dynamic",
-                            lineWrapping: true
+                            lineWrapping: true,
+                            onChange: function (c) {
+                                c.save();
+                            }
                         });
                     }
 
