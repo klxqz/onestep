@@ -26,10 +26,12 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
 
         $cart_action = new shopFrontendCartAction();
         $cart_action->run();
+        waRequest::setParam('flexdiscount-ignore', 'onestep');
         $this->checkCart();
 
         $checkout_action = new shopOnestepPluginFrontendCheckoutAction();
         $checkout_action->run();
+        waRequest::setParam('flexdiscount-ignore', null);
 
         $this->view->assign('onestep_css_url', shopOnestepHelper::getRouteTemplateUrl('onestep_css', $route_hash));
         $this->view->assign('onestep_js_url', shopOnestepHelper::getRouteTemplateUrl('onestep_js', $route_hash));

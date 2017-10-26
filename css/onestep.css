@@ -1,8 +1,9 @@
 /* 16x16 Icons
 -------------- */
-.onestep-cart i.icon16 { background-repeat:no-repeat; height:16px; width:16px; display:inline-block; text-indent:-9999px; text-decoration:none!important; }
+.onestep-cart i.icon16 { background-repeat:no-repeat; height:16px; width:16px; display:inline-block; text-indent:-9999px; text-decoration:none!important; background-image: url("{$wa_url}wa-apps/shop/plugins/onestep/img/icons.png"); background-size: 260px 160px; }
 .onestep-cart * i.icon16 { text-decoration:none!important; vertical-align:top; margin: 0.2em 0.25em 0 0; }
-.onestep-cart .icon16.remove { background-image: url("{$wa_url}wa-apps/shop/plugins/onestep/img/icons.png"); background-position:-96px 0; background-size: 194px 46px; }
+.onestep-cart .icon16.remove { background-position:-96px -16px; }
+.onestep-cart .icon16.like { background-position:0 -16px; margin-top: 0; }
 .onestep-cart .icon16.loading { background-image: url("{$wa_url}wa-apps/shop/plugins/onestep/img/loading16.gif"); background-position:0 0; }
 
 /* 32x32 Icons
