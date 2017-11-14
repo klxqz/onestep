@@ -25,8 +25,8 @@ class shopOnestepPluginFrontendOnestepAction extends shopFrontendAction {
         }
 
         $cart_action = new shopFrontendCartAction();
-        $cart_action->run();
         waRequest::setParam('flexdiscount-ignore', 'onestep');
+        $cart_action->run();
         $this->checkCart();
 
         $checkout_action = new shopOnestepPluginFrontendCheckoutAction();
