@@ -101,33 +101,7 @@
 
             </div>
         </div>
-
-        <div class="field-group"{if !$settings.status|default:0} style="display:none"{/if}>
-            <h3 class="grey">Расширьте функционал</h3>
-            <div class="field">
-                <div class="name">
-                    Минимальный заказ
-                </div>
-                <div class="value">
-                    <a target="_blank" href="https://www.webasyst.ru/store/plugin/shop/wholesale/">
-                        <img src="{$plugin->getPluginStaticUrl()}img/wholesale.png" />
-                    </a>
-                    <p class="hint">Воспользуйтесь дополнительным плагином <a target="_blank" href="https://www.webasyst.ru/store/plugin/shop/wholesale/">Минимальный заказ</a>, чтобы задать ограничения на минимальную сумму, минимальное количество товаров в заказе и другие ограничения</p>
-                </div>
-            </div>
-            <div class="field">
-                <div class="name">
-                    Маска для номера телефона 
-                </div>
-                <div class="value">
-                    <a target="_blank" href="https://www.webasyst.ru/store/plugin/shop/phmask/">
-                        <img src="{$plugin->getPluginStaticUrl()}img/phmask.png" />
-                    </a>
-                    <p class="hint">Воспользуйтесь дополнительным плагином <a target="_blank" href="https://www.webasyst.ru/store/plugin/shop/phmask/">Маска для номера телефона</a>, чтобы задать формат для ввода телефонного номера, например с <strong>+7</strong> или <strong>8</strong></p>
-                </div>
-            </div>
-        </div>
-
+{time()}
         <div class="field-group submit"{if !$settings.status|default:0} style="display:none"{/if}>
             <div class="field">
                 <div class="value submit">
