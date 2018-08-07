@@ -59,6 +59,31 @@ class shopOnestepCheckoutContactinfo extends shopCheckoutContactinfo {
             }
         }
 
+        if (
+                !empty($fields_config['address.shipping']['fields']['city']) ||
+                !empty($fields_config['address.shipping']['fields']['region']) ||
+                !empty($fields_config['address.shipping']['fields']['country'])
+        ) {
+            $autoload = waAutoload::getInstance();
+            $autoload->add('SxGeo', "wa-apps/shop/plugins/onestep/lib/vendors/SxGeo.php");
+            $SxGeo = new SxGeo(wa()->getAppPath('plugins/onestep/lib/vendors/SxGeoCity.dat', 'shop'));
+            $ip = waRequest::getIp();
+            $info = $SxGeo->getCityFull($ip);
+
+            if (!empty($info['city']['name_ru']) && !empty($fields_config['address.shipping']['fields']['city'])) {
+                $fields_config['address.shipping']['fields']['city']['value'] = $info['city']['name_ru'];
+            }
+            if (!empty($info['region']['name_ru']) && !empty($fields_config['address.shipping']['fields']['region'])) {
+                $fields_config['address.shipping']['fields']['region']['value'] = $info['region']['name_ru'];
+            }
+            if (!empty($info['country']['name_ru']) && !empty($fields_config['address.shipping']['fields']['country'])) {
+                $country_model = new waCountryModel();
+                if ($country = $country_model->getByField('iso2letter', $info['country']['iso'])) {
+                    $fields_config['address.shipping']['fields']['country']['value'] = $country['iso3letter'];
+                }
+            }
+        }
+
         if ($checkout && !wa()->getUser()->isAuth()) {
             $form = shopOnestepContactForm::loadConfig(
                             $fields_config, array(

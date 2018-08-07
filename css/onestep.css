@@ -4,7 +4,7 @@
 .onestep-cart * i.icon16 { text-decoration:none!important; vertical-align:top; margin: 0.2em 0.25em 0 0; }
 .onestep-cart .icon16.remove { background-position:-96px -16px; }
 .onestep-cart .icon16.like { background-position:0 -16px; margin-top: 0; }
-.onestep-cart .icon16.loading { background-image: url("{$wa_url}wa-apps/shop/plugins/onestep/img/loading16.gif"); background-position:0 0; }
+.onestep-cart .icon16.loading { background-image: url("{$wa_url}wa-apps/shop/plugins/onestep/img/loading16.gif"); background-size: 16px 16px; background-position:0 0; }
 
 /* 32x32 Icons
 -------------- */
@@ -204,9 +204,9 @@
 .onestep-cart label input[type="radio"] { opacity: 1; }
 
 /* Тема дизайна «TopShop» */
-.checkout ul.checkout-options.shipping li{
+/*.checkout ul.checkout-options.shipping li{
     display: unset !important;
-}
+}*/
 .checkout ul.checkout-options.shipping h3{
     display: unset !important;
     float: unset !important;

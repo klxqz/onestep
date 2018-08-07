@@ -22,7 +22,7 @@ class shopOnestepCheckoutPayment extends shopCheckoutPayment {
         $selected = null;
         foreach ($methods as $key => $m) {
             $method_id = $m['id'];
-            if (in_array($method_id, $disabled)) {
+            if (in_array($method_id, $disabled) || !$m['status']) {
                 unset($methods[$key]);
                 continue;
             }
@@ -46,16 +46,16 @@ class shopOnestepCheckoutPayment extends shopCheckoutPayment {
                 $selected = $method_id;
             }
         }
-        
-        
+
+
 
         $view = wa()->getView();
         $view->assign('checkout_payment_methods', $methods);
-        
+
         $payment_id = $this->getSessionData('payment', $selected);
-        if(!empty($methods[$payment_id])) {
+        if (!empty($methods[$payment_id])) {
             $view->assign('payment_id', $payment_id);
-        } elseif(!empty($methods[$selected])) {
+        } elseif (!empty($methods[$selected])) {
             $view->assign('payment_id', $selected);
         }
 

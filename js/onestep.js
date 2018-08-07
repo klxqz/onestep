@@ -28,7 +28,7 @@
             if (this.options.submit) {
                 this.errorScroll();
             }
-            this.reloadSteps(['confirmation']);
+            this.reloadSteps(['payment', 'confirmation']);
         },
         errorScroll: function () {
             if ($('.checkout-step .error:visible').length) {
