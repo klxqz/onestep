@@ -286,4 +286,20 @@ class shopOnestepCheckoutShipping extends shopCheckoutShipping {
         }
     }
 
+    /* Переопределяем данный метод т.к. в более ранних версиях он отсутствует */
+
+    protected function isFreeShipping() {
+        $is_free = false;
+
+        $coupon_code = $this->getSessionData('coupon_code');
+        if (!empty($coupon_code)) {
+            empty($cm) && ($cm = new shopCouponModel());
+            $coupon = $cm->getByField('code', $coupon_code);
+            if ($coupon && $coupon['type'] == '$FS') {
+                $is_free = true;
+            }
+        }
+        return $is_free;
+    }
+
 }
