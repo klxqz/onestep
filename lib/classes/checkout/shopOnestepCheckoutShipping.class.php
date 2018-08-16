@@ -302,4 +302,64 @@ class shopOnestepCheckoutShipping extends shopCheckoutShipping {
         return $is_free;
     }
 
+    /* три метода, которые в более ранних версиях shop-script отсутствуют */
+
+    protected function getPlugins($id = null) {
+        $options = array();
+
+        # filter enabled at frontend plugins
+        $shipping_id = waRequest::param('shipping_id');
+        if ($shipping_id && is_array($shipping_id)) {
+            $options['id'] = $shipping_id;
+        }
+
+        if ($id) {
+            if (empty($options['id'])) {
+                $options['id'] = $id;
+            } elseif (in_array($id, $options['id'])) {
+                $options['id'] = $id;
+            } else {
+                return array();
+            }
+        }
+
+        # filter applicable shipping plugins
+        if ($payment_id = $this->getSessionData('payment')) {
+            if (self::getStepNumber($this->step_id) > self::getStepNumber('payment')) {
+                $options[shopPluginModel::TYPE_PAYMENT] = $payment_id;
+            }
+        }
+
+        return $this->plugin_model->listPlugins(shopPluginModel::TYPE_SHIPPING, $options);
+    }
+
+    public function __get($name) {
+        static $instances = array();
+        $value = null;
+        if (!isset($instances[$name])) {
+            switch ($name) {
+                case 'cart':
+                    $instances[$name] = new shopCart();
+                    break;
+                case 'plugin_model':
+                    $instances[$name] = new shopPluginModel();
+                    break;
+            }
+        }
+        return isset($instances[$name]) ? $instances[$name] : null;
+    }
+
+    protected static function getCheckoutSettings($name = null) {
+        static $settings;
+        if (!$settings) {
+            $config = wa('shop')->getConfig();
+            /**
+             * @var shopConfig $config
+             */
+            $settings = $config->getCheckoutSettings();
+        }
+
+        return $name ? ifset($settings[$name]) : $settings;
+    }
+
 }
