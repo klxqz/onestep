@@ -69,6 +69,9 @@
                         labelOff: "Выкл",
                         className: 'mini'
                     });
+                    $('input[name="route_settings[is_phonemask]"]').change(function () {
+                        $('.field.phonemask').slideToggle('slow');
+                    });
 
                     for (var i = 0; i < templates.length; i++) {
                         CodeMirror.fromTextArea(document.getElementById(templates[i].id), {

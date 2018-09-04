@@ -28,7 +28,54 @@
             if (this.options.submit) {
                 this.errorScroll();
             }
-            this.reloadSteps(['payment', 'confirmation']);
+            if (this.options.is_phonemask) {
+                this.inputmask();
+            }
+
+            var region_field = $('input[name="customer[address.shipping][region]"]');
+            if (region_field.length && region_field.val()) {
+                var region_name = region_field.val();
+                $(document).ajaxComplete(function (event, xhr, settings) {
+                    if (settings.url === "/data/regions/") {
+                        var field = $('[name="customer[address.shipping][region]"]');
+                        if (field.length && field.get(0).tagName == 'SELECT') {
+                            field.find('option:contains("' + region_name + '")').attr("selected", true);
+                        }
+                    }
+                });
+            }
+
+            var region_shipping_name = [];
+            $('ul.checkout-options li input[name=shipping_id]').each(function () {
+                var shipping_id = $(this).val();
+                var region_field = $('input[name="customer_' + shipping_id + '[address.shipping][region]"]');
+                if (region_field.length && region_field.val()) {
+                    region_shipping_name[shipping_id] = region_field.val();
+                }
+            });
+
+            if (region_shipping_name) {
+                $(document).ajaxComplete(function (event, xhr, settings) {
+                    if (settings.url === "/data/regions/") {
+
+                        $('ul.checkout-options li input[name=shipping_id]').each(function () {
+                            var shipping_id = $(this).val();
+                            var field = $('[name="customer_' + shipping_id + '[address.shipping][region]"]');
+                            if (field.length && field.get(0).tagName == 'SELECT') {
+                                field.find('option:contains("' + region_shipping_name[shipping_id] + '")').attr("selected", true);
+                            }
+                        });
+
+
+                    }
+                });
+            }
+
+
+            this.reloadSteps(['shipping', 'payment', 'confirmation']);
+        },
+        inputmask: function () {
+            $('input[name="customer[phone]"]').inputmask(this.options.phonemask);
         },
         errorScroll: function () {
             if ($('.checkout-step .error:visible').length) {
@@ -73,6 +120,34 @@
         initContactinfo: function () {
             this.createUser();
             var self = this;
+
+            $("#checkout-contact-form .wa-field-address").find('input,select').change(function () {
+                if ($(this).data('ignore')) {
+                    return true;
+                }
+                var name = $(this).attr('name');
+                var value = $(this).val();
+                var match = name.match(/customer\[address.shipping\]\[(.+)\]/);
+
+                if (match[1] !== undefined) {
+                    $('ul.checkout-options li input[name=shipping_id]').each(function () {
+                        var shipping_id = $(this).val();
+                        var field = $('[name="customer_' + shipping_id + '[address.shipping][' + match[1] + ']"]');
+                        if (field.length) {
+                            switch (field.get(0).tagName) {
+                                case 'SELECT':
+                                    field.find('option[value="' + value + '"]').attr("selected", true);
+                                    break;
+                                case 'INPUT':
+                                    field.val(value);
+                                    break;
+                            }
+                        }
+                    });
+                }
+            });
+
+
             $('#checkout-contact-form input:not([type="checkbox"]),#checkout-contact-form select').change(function () {
                 if ($(this).closest('#create-user-div').length || $(this).attr('name') == 'customer[phone]' || $(this).attr('name') == 'customer[email]') {
                     //return false;
@@ -131,6 +206,18 @@
                             }
                         }
                     });
+
+                    var field = $('#checkout-contact-form .wa-field-address [name="customer[address.shipping][' + match[2] + ']"]');
+                    if (field.length) {
+                        switch (field.get(0).tagName) {
+                            case 'SELECT':
+                                field.find('option[value="' + value + '"]').attr("selected", true);
+                                break;
+                            case 'INPUT':
+                                field.val(value);
+                                break;
+                        }
+                    }
                 }
 
                 var shipping_methods = [];
@@ -220,8 +307,7 @@
                     self.reloadSteps(['payment', 'confirmation']);
                 }, "json").fail(function (response) {
                     console.log(response);
-                    for (var i in shipping_external_methods) {
-                        var shipping_id = self.options.external_methods[i];
+                    for (var shipping_id in shipping_external_methods) {
                         self.responseCallback(shipping_id, 'Ошибка получения данных');
                     }
                     self.reloadSteps(['payment', 'confirmation']);

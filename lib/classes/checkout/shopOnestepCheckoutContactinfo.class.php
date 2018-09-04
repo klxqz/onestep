@@ -59,10 +59,20 @@ class shopOnestepCheckoutContactinfo extends shopCheckoutContactinfo {
             }
         }
 
+        if (shopOnestepHelper::getRouteSettings(null, 'status')) {
+            $route_hash = null;
+            $route_settings = shopOnestepHelper::getRouteSettings();
+        } elseif (shopOnestepHelper::getRouteSettings(0, 'status')) {
+            $route_hash = 0;
+            $route_settings = shopOnestepHelper::getRouteSettings(0);
+        }
+
         if (
+                !empty($route_settings['sxgeo']) && (
                 !empty($fields_config['address.shipping']['fields']['city']) ||
                 !empty($fields_config['address.shipping']['fields']['region']) ||
                 !empty($fields_config['address.shipping']['fields']['country'])
+                )
         ) {
             $autoload = waAutoload::getInstance();
             $autoload->add('SxGeo', "wa-apps/shop/plugins/onestep/lib/vendors/SxGeo.php");

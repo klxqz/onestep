@@ -65,6 +65,8 @@
     $.onestep.init({
         shipping_url: "{$wa->getUrl('/frontend/shipping',['plugin' => 'onestep'])}",
         validate: {intval($settings.validate)},
+        is_phonemask: {intval($settings.is_phonemask)},
+        phonemask: "{$settings.phonemask|escape}",
         submit: {intval($wa->post('confirmation'))}
     });
 </script>

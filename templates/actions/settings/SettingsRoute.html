@@ -27,11 +27,56 @@
     </div>
     <div class="field">
         <div class="name">
-            Только для ПК
+            Определение города по IP-адресу
+        </div>
+        <div class="value no-shift s-ibutton-checkbox">
+            <input type="hidden" name="route_settings[sxgeo]" value="0" />
+            <input class="ibutton" type="checkbox"{if $route_settings.sxgeo|default:0} checked="checked"{/if} name="route_settings[sxgeo]" value="1" />
+            <p class="hint">
+                Плагин будет пытаться определить адрес покупателя по его IP-адресу.<br/>
+                Плагин может определить страну, регион и город.
+            </p>
+        </div>
+    </div>
+    <div class="field">
+        <div class="name">
+            Маска для телефона
+        </div>
+        <div class="value no-shift s-ibutton-checkbox">
+            <input type="hidden" name="route_settings[is_phonemask]" value="0" />
+            <input class="ibutton" type="checkbox"{if $route_settings.is_phonemask|default:0} checked="checked"{/if} name="route_settings[is_phonemask]" value="1" />
+            <p class="hint">
+                Ввод телефонного номера по маске.
+            </p>
+        </div>
+    </div>
+    <div class="field phonemask"{if !$route_settings.is_phonemask|default:0} style="display:none;"{/if}>
+        <div class="name">
+            Маска телефонного номера
         </div>
         <div class="value">
+            <input type="text"name="route_settings[phonemask]" value="{$route_settings.phonemask|default:'+7(###)###-##-##'|escape}" />
+            <p class="hint">
+                Для номеров России используется маска <strong>+7(###)###-##-##</strong>
+            </p>
+        </div>
+    </div>
+    <div class="field">
+        <div class="name">
+            Использовать проверку заполнения обязательных полей формы
+        </div>
+        <div class="value no-shift s-ibutton-checkbox">
+            <input type="hidden" name="route_settings[validate]" value="0" />
+            <input class="ibutton" type="checkbox" name="route_settings[validate]" value="1" {if $route_settings.validate|default:1}checked="checked"{/if} />
+        </div>
+    </div>
+    <div class="field">
+        <div class="name">
+            Только для ПК
+        </div>
+        <div class="value no-shift s-ibutton-checkbox">
             <input type="hidden" name="route_settings[desktop_only]" value="0" />
-            <input type="checkbox"{if $route_settings.desktop_only|default:0} checked="checked"{/if} name="route_settings[desktop_only]" value="1" />
+            <input class="ibutton" type="checkbox"{if $route_settings.desktop_only|default:0} checked="checked"{/if} name="route_settings[desktop_only]" value="1" />
             <p class="hint">
                 Плагин работает только для настольных компьютеров и отключается для мобильных устройств.<br/> 
                 Для мобильных работает стандартная корзина.
@@ -66,15 +111,6 @@
         </div>
         <div class="value">
             <input type="text" name="route_settings[page_title]" value="{$route_settings.page_title|default:'Корзина'|escape}" />
-        </div>
-    </div>
-    <div class="field">
-        <div class="name">
-            Использовать проверку заполнения обязательных полей формы
-        </div>
-        <div class="value">
-            <input type="hidden" name="route_settings[validate]" value="0" />
-            <input type="checkbox" name="route_settings[validate]" value="1" {if $route_settings.validate|default:1}checked="checked"{/if} />
         </div>
     </div>
 </div>

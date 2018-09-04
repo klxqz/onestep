@@ -4,7 +4,7 @@ return array(
     'name' => 'Заказ на одной странице',
     'description' => 'Оформление заказа в один шаг на одной странице',
     'vendor' => '985310',
-    'version' => '3.0.3',
+    'version' => '3.0.4',
     'img' => 'img/onestep.png',
     'shop_settings' => true,
     'frontend' => true,

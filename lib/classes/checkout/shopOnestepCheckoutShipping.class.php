@@ -254,10 +254,20 @@ class shopOnestepCheckoutShipping extends shopCheckoutShipping {
                 uksort($address['fields'], $compare);
             }
             /* Добавляем определение адреса - начало */
+            if (shopOnestepHelper::getRouteSettings(null, 'status')) {
+                $route_hash = null;
+                $route_settings = shopOnestepHelper::getRouteSettings();
+            } elseif (shopOnestepHelper::getRouteSettings(0, 'status')) {
+                $route_hash = 0;
+                $route_settings = shopOnestepHelper::getRouteSettings(0);
+            }
+
             if (
+                    !empty($route_settings['sxgeo']) && (
                     !empty($address['fields']['city']) ||
                     !empty($address['fields']['region']) ||
                     !empty($address['fields']['country'])
+                    )
             ) {
                 $autoload = waAutoload::getInstance();
                 $autoload->add('SxGeo', "wa-apps/shop/plugins/onestep/lib/vendors/SxGeo.php");
