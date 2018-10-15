@@ -1,4 +1,14 @@
+{if !empty($settings.is_dadata)}
+    <link href="https://cdn.jsdelivr.net/npm/suggestions-jquery@18.8.0/dist/css/suggestions.min.css" type="text/css" rel="stylesheet" />
+    <!--[if lt IE 10]>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajaxtransport-xdomainrequest/1.0.1/jquery.xdomainrequest.min.js"></script>
+    <![endif]-->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/suggestions-jquery@18.8.0/dist/js/jquery.suggestions.min.js"></script>
+{/if}
 <link href="{$onestep_css_url}" rel="stylesheet" type="text/css" />
+{if !empty($settings.sticky)}
+    <script src="{$wa_app_static_url}plugins/onestep/js/jquery.airStickyBlock.min.js"></script>
+{/if}
 <script src="{$wa_app_static_url}plugins/onestep/js/jquery.validate.min.js"></script>
 <script src="{$wa_app_static_url}plugins/onestep/js/jquery.inputmask.bundle.min.js"></script>
 <script type="text/javascript" src="{$onestep_js_url}"></script>
@@ -59,7 +69,9 @@
                                     </script>
                                 {/if}
                             </td>
-                            <td class="align-center nowrap"><span class="gray">&times;</span> <input type="text" name="quantity[{$item.id}]" value="{$item.quantity}" class="qty{if !empty($item.error)} error{/if}"></td>
+                            <td class="align-center nowrap">
+                                <span class="choice"><span class="plus">+</span><span class="minus">-</span><input type="text" name="quantity[{$item.id}]" value="{$item.quantity}" class="qty{if !empty($item.error)} error{/if}"></span>
+                            </td>
                             <td class="align-center item-total nowrap">{shop_currency_html($item.full_price, true)}</td>
                             <td class="align-center"><a class="delete" href="#" title="[`Remove from cart`]"><i class="icon16 remove"></i></a></td>
                         </tr>
@@ -128,4 +140,19 @@
 
     </div>
 
+    <script type="text/javascript">
+        $.onestep.init({
+            shipping_url: "{$wa->getUrl('/frontend/shipping',['plugin' => 'onestep'])}",
+            validate: {intval($settings.validate)},
+            is_phonemask: {intval($settings.is_phonemask)},
+            phonemask: "{$settings.phonemask|escape}",
+            is_dadata: {intval($settings.is_dadata)},
+            dadata_key: "{$settings.dadata_key|escape}",
+            dadata_fio: {intval($settings.dadata_fio)},
+            dadata_email: {intval($settings.dadata_email)},
+            dadata_address: {intval($settings.dadata_address)},
+            sticky: {intval($settings.sticky)},
+            submit: {intval($wa->post('confirmation'))}
+        });
+    </script>
 {/if}

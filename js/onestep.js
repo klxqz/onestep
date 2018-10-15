@@ -31,6 +31,7 @@
             if (this.options.is_phonemask) {
                 this.inputmask();
             }
+            this.initSticky();
 
             var region_field = $('input[name="customer[address.shipping][region]"]');
             if (region_field.length && region_field.val()) {
@@ -73,6 +74,18 @@
 
 
             this.reloadSteps(['shipping', 'payment', 'confirmation']);
+        },
+        initSticky: function () {
+            console.log(document.body.clientWidth);
+            if (!this.options.sticky || document.body.clientWidth < 1024) {
+                return;
+            }
+            window.onload = function () {
+                $('.checkout-step.step-confirmation').airStickyBlock({
+                    stopBlock: '.checkout-container'
+                });
+            }
+
         },
         inputmask: function () {
             $('input[name="customer[phone]"]').inputmask(this.options.phonemask);
@@ -117,6 +130,132 @@
                 });
             });
         },
+        fullName: function () {
+            if ($('[name="customer[name]"]').length) {
+                $('[name="customer[firstname]"],[name="customer[lastname]"],[name="customer[middlename]"]').change(function () {
+                    var full_name = '';
+                    if ($('[name="customer[lastname]"]').length) {
+                        full_name += ' ' + $('[name="customer[lastname]"]').val();
+                    }
+                    if ($('[name="customer[firstname]"]').length) {
+                        full_name += ' ' + $('[name="customer[firstname]"]').val();
+                    }
+                    if ($('[name="customer[middlename]"]').length) {
+                        full_name += ' ' + $('[name="customer[middlename]"]').val();
+                    }
+                    $('[name="customer[name]"]').val(full_name.trim());
+                });
+
+            }
+        },
+        initDaDataFio: function () {
+            var self = this;
+            if (this.options.dadata_fio) {
+                $('[name="customer[name]"]').suggestions({
+                    token: this.options.dadata_key,
+                    type: "NAME",
+                    count: 5,
+                    onSelect: function (suggestion) {
+                        console.log(suggestion);
+                        if ($('[name="customer[firstname]"]').length) {
+                            $('[name="customer[firstname]"]').val(suggestion.data.name);
+                        }
+                        if ($('[name="customer[lastname]"]').length) {
+                            $('[name="customer[lastname]"]').val(suggestion.data.surname);
+                        }
+                        if ($('[name="customer[middlename]"]').length) {
+                            $('[name="customer[middlename]"]').val(suggestion.data.patronymic);
+                        }
+                    }
+                });
+                $('[name="customer[firstname]"]').suggestions({
+                    token: this.options.dadata_key,
+                    type: "NAME",
+                    params: {
+                        parts: ["NAME"]
+                    },
+                    count: 5,
+                    onSelect: function (suggestion) {
+                        console.log(suggestion);
+                    }
+                });
+                $('[name="customer[lastname]"]').suggestions({
+                    token: this.options.dadata_key,
+                    type: "NAME",
+                    params: {
+                        parts: ["SURNAME"]
+                    },
+                    count: 5,
+                    onSelect: function (suggestion) {
+                        console.log(suggestion);
+                    }
+                });
+                $('[name="customer[middlename]"]').suggestions({
+                    token: this.options.dadata_key,
+                    type: "NAME",
+                    params: {
+                        parts: ["PATRONYMIC"]
+                    },
+                    count: 5,
+                    onSelect: function (suggestion) {
+                        console.log(suggestion);
+                    }
+                });
+            }
+        },
+        updateAddressField: function (name, value) {
+
+            var match = name.match(/customer\[address.shipping\]\[([^\]]*)\]/);
+
+            if (match && match[1] !== undefined) {
+                $('ul.checkout-options li input[name=shipping_id]').each(function () {
+                    var shipping_id = $(this).val();
+                    var field = $('[name="customer_' + shipping_id + '[address.shipping][' + match[1] + ']"]');
+                    if (field.length) {
+                        switch (field.get(0).tagName) {
+                            case 'SELECT':
+                                field.find('option[value="' + value + '"]').attr("selected", true);
+                                break;
+                            case 'INPUT':
+                                field.val(value);
+                                break;
+                        }
+                    }
+                });
+            }
+
+            var match = name.match(/customer_[0-9]*\[address.shipping\]\[([^\]]*)\]/);
+
+            if (match && match[1] !== undefined) {
+                //console.log(match[1]);
+                var field = $('[name="customer[address.shipping][' + match[1] + ']"]');
+                if (field.length) {
+                    switch (field.get(0).tagName) {
+                        case 'SELECT':
+                            field.find('option[value="' + value + '"]').attr("selected", true);
+                            break;
+                        case 'INPUT':
+                            field.val(value);
+                            break;
+                    }
+                }
+                $('ul.checkout-options li input[name=shipping_id]').each(function () {
+                    var shipping_id = $(this).val();
+                    var field = $('[name="customer_' + shipping_id + '[address.shipping][' + match[1] + ']"]');
+                    if (field.length) {
+                        switch (field.get(0).tagName) {
+                            case 'SELECT':
+                                field.find('option[value="' + value + '"]').attr("selected", true);
+                                break;
+                            case 'INPUT':
+                                field.val(value);
+                                break;
+                        }
+                    }
+                });
+            }
+
+        },
         initContactinfo: function () {
             this.createUser();
             var self = this;
@@ -127,29 +266,107 @@
                 }
                 var name = $(this).attr('name');
                 var value = $(this).val();
-                var match = name.match(/customer\[address.shipping\]\[(.+)\]/);
-
-                if (match[1] !== undefined) {
-                    $('ul.checkout-options li input[name=shipping_id]').each(function () {
-                        var shipping_id = $(this).val();
-                        var field = $('[name="customer_' + shipping_id + '[address.shipping][' + match[1] + ']"]');
-                        if (field.length) {
-                            switch (field.get(0).tagName) {
-                                case 'SELECT':
-                                    field.find('option[value="' + value + '"]').attr("selected", true);
-                                    break;
-                                case 'INPUT':
-                                    field.val(value);
-                                    break;
-                            }
+                self.updateAddressField(name, value);
+            });
+            this.fullName();
+            if (this.options.is_dadata) {
+                this.initDaDataFio();
+                if (this.options.dadata_email) {
+                    $('[name="customer[email]"]').suggestions({
+                        token: this.options.dadata_key,
+                        type: "EMAIL",
+                        count: 5,
+                        onSelect: function (suggestion) {
+                            console.log(suggestion);
                         }
                     });
                 }
-            });
+                if (this.options.dadata_address) {
+                    $('[name="customer[address.shipping][street]"]').suggestions({
+                        token: this.options.dadata_key,
+                        type: "ADDRESS",
+                        count: 5,
+                        onSelect: function (suggestion) {
+                            console.log(suggestion);
+                            if ($('[name="customer[address.shipping][zip]"]').length) {
+                                $('[name="customer[address.shipping][zip]"]').val(suggestion.data.postal_code);
+                            }
+                            if ($('[name="customer[address.shipping][city]"]').length) {
+                                $('[name="customer[address.shipping][city]"]').val(suggestion.data.city);
+                                self.updateAddressField('customer[address.shipping][city]', suggestion.data.city);
+                            }
+                            if ($('[name="customer[address.shipping][region]"]').length) {
+                                if ($('[name="customer[address.shipping][region]"]').get(0).tagName == 'SELECT') {
+                                    $('[name="customer[address.shipping][region]"] option').each(function () {
+                                        if ($(this).text().indexOf(suggestion.data.region) != -1) {
+                                            $(this).attr('selected', true);
+                                            self.updateAddressField('customer[address.shipping][region]', $(this).val());
+                                        }
+                                    });
+                                } else {
+                                    $('[name="customer[address.shipping][region]"]').val(suggestion.data.region);
+                                    self.updateAddressField('customer[address.shipping][region]', suggestion.data.region);
+                                }
+                            }
+
+                            var value = suggestion.value;
+                            if (suggestion.data.city_with_type) {
+                                value = value.replace(suggestion.data.city_with_type + ', ', '');
+                            }
+                            $('[name="customer[address.shipping][street]"]').val(value);
+                            self.updateAddressField('customer[address.shipping][street]', value);
+                        }
+                    });
+
+                    $('[name="customer[address.shipping][city]"]').suggestions({
+                        token: this.options.dadata_key,
+                        type: "ADDRESS",
+                        hint: false,
+                        bounds: "city-settlement",
+                        count: 5,
+                        onSuggestionsFetch: function (suggestions) {
+                            return suggestions.filter(function (suggestion) {
+                                return suggestion.data.city_district === null;
+                            });
+                        },
+                        onSelect: function (suggestion) {
+                            console.log(suggestion);
+                            var $region_field = $('[name="customer[address.shipping][region]"]');
+                            if ($region_field.length) {
+                                if ($region_field.get(0).tagName == 'SELECT') {
+                                    $region_field.find('option').each(function () {
+                                        if ($(this).text().indexOf(suggestion.data.region) != -1) {
+                                            $(this).attr('selected', true);
+                                            self.updateAddressField('[name="customer[address.shipping][region]"]', $(this).val());
+                                        }
+                                    });
+                                } else {
+                                    $region_field.val(suggestion.data.region);
+                                    self.updateAddressField('[name="customer[address.shipping][region]"]', suggestion.data.region);
+                                }
+                            }
+
+                            var value = suggestion.value;
+                            value = value.replace('г ', '');
+                            $('[name="customer[address.shipping][city]"]').val(value);
+                        }
+                    });
+                }
+
+            }
+
 
 
             $('#checkout-contact-form input:not([type="checkbox"]),#checkout-contact-form select').change(function () {
-                if ($(this).closest('#create-user-div').length || $(this).attr('name') == 'customer[phone]' || $(this).attr('name') == 'customer[email]') {
+                if (
+                        $(this).closest('#create-user-div').length ||
+                        $(this).attr('name') == 'customer[phone]' ||
+                        $(this).attr('name') == 'customer[email]' ||
+                        $(this).attr('name') == 'customer[name]' ||
+                        $(this).attr('name') == 'customer[firstname]' ||
+                        $(this).attr('name') == 'customer[lastname]' ||
+                        $(this).attr('name') == 'customer[middlename]'
+                        ) {
                     //return false;
                 } else {
                     self.reloadSteps(['shipping', 'payment', 'confirmation']);
@@ -157,6 +374,7 @@
             });
         },
         initShipping: function () {
+            var self = this;
             this.shippingExternalMethods();
             this.shippingOptions();
             this.addressChange();
@@ -165,6 +383,47 @@
             $(".checkout-options .wa-address input,.checkout-options .wa-address select").attr('disabled', true);
             $(".checkout-options [name=shipping_id]:checked").closest('li').find('.wa-address input,.wa-address select').removeAttr('disabled');
 
+            $('ul.checkout-options li input[name=shipping_id]').each(function () {
+                var shipping_id = $(this).val();
+                var $city_field = $('[name="customer_' + shipping_id + '[address.shipping][city]"]');
+                if ($city_field.length) {
+                    $city_field.suggestions({
+                        token: self.options.dadata_key,
+                        type: "ADDRESS",
+                        hint: false,
+                        bounds: "city-settlement",
+                        count: 5,
+                        onSuggestionsFetch: function (suggestions) {
+                            return suggestions.filter(function (suggestion) {
+                                return suggestion.data.city_district === null;
+                            });
+                        },
+                        onSelect: function (suggestion) {
+                            console.log(suggestion);
+                            var $region_field = $('[name="customer_' + shipping_id + '[address.shipping][region]"]');
+                            if ($region_field.length) {
+                                if ($region_field.get(0).tagName == 'SELECT') {
+                                    $region_field.find('option').each(function () {
+                                        if ($(this).text().indexOf(suggestion.data.region) != -1) {
+                                            $(this).attr('selected', true);
+                                            self.updateAddressField('[name="customer_' + shipping_id + '[address.shipping][region]"]', $(this).val());
+                                        }
+                                    });
+
+                                } else {
+                                    $region_field.val(suggestion.data.region);
+                                    self.updateAddressField('[name="customer_' + shipping_id + '[address.shipping][region]"]', suggestion.data.region);
+                                }
+                            }
+
+                            var value = suggestion.value;
+                            value = value.replace('г ', '');
+                            $city_field.val(value);
+                        }
+                    });
+                }
+
+            });
 
             var self = this;
             $('input[name=shipping_id],.shipping-rates').change(function () {
@@ -404,6 +663,19 @@
                     }
                 } else {
                     that.val(1);
+                }
+            });
+            $(".onestep-cart .choice span").click(function () {
+                var qty = $(this).siblings('.qty');
+                var val = parseInt(qty.val());
+                if ($(this).hasClass('plus')) {
+                    qty.val(val + 1);
+                    qty.change();
+                } else if ($(this).hasClass('minus')) {
+                    if (val > 1) {
+                        qty.val(val - 1);
+                        qty.change();
+                    }
                 }
             });
             $(".onestep-cart .cart .services input:checkbox").change(function () {

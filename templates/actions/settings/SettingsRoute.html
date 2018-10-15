@@ -11,7 +11,7 @@
     </div>
 </div>
 
-<div class="field-group">
+<div class="field-group"{if !$route_settings.status|default:0} style="display:none;"{/if}>
     <div class="field">
         <div class="name">
             Режим
@@ -72,6 +72,66 @@
     </div>
     <div class="field">
         <div class="name">
+            Подтверждение заказа всегда на виду
+        </div>
+        <div class="value no-shift s-ibutton-checkbox">
+            <input type="hidden" name="route_settings[sticky]" value="0" />
+            <input class="ibutton" type="checkbox" name="route_settings[sticky]" value="1" {if $route_settings.sticky|default:0}checked="checked"{/if} />
+        </div>
+    </div>
+    <div class="field">
+        <div class="name">
+            Подсказки для полей DaData API
+        </div>
+        <div class="value no-shift s-ibutton-checkbox">
+            <input type="hidden" name="route_settings[is_dadata]" value="0" />
+            <input class="ibutton" type="checkbox"{if $route_settings.is_dadata|default:0} checked="checked"{/if} name="route_settings[is_dadata]" value="1" />
+            <p class="hint">
+                Использовать серсис <a target="_blank" href="https://dadata.ru/">DaData.ru</a> для создания подсказак при заполнение полей адреса.<br/>
+                <strong>При регистрации необходимо подтвердить email иначе подсказки могут не работать</strong>
+            </p>
+        </div>
+    </div>
+    <div class="field dadata"{if !$route_settings.is_dadata|default:0} style="display:none;"{/if}>
+        <div class="name">
+            DaData API-ключ
+        </div>
+        <div class="value">
+            <input type="text"name="route_settings[dadata_key]" value="{$route_settings.dadata_key|default:''|escape}" />
+            <p class="hint">
+                API-ключ, который можно скопировать из личного кабинета сервиса <a target="_blank" href="https://dadata.ru/">DaData.ru</a>
+            </p>
+        </div>
+    </div>
+    <div class="field dadata"{if !$route_settings.is_dadata|default:0} style="display:none;"{/if}>
+        <div class="value">
+            <input type="hidden" name="route_settings[dadata_fio]" value="0" />
+            <input type="checkbox"{if $route_settings.dadata_fio|default:0} checked="checked"{/if} name="route_settings[dadata_fio]" value="1" />
+            Подсказки для полей ФИО
+            <p class="hint">
+                Подсказки для заполнения имени, фамилии, отчества
+            </p>
+        </div>
+    </div>
+    <div class="field dadata"{if !$route_settings.is_dadata|default:0} style="display:none;"{/if}>
+        <div class="value">
+            <input type="hidden" name="route_settings[dadata_email]" value="0" />
+            <input type="checkbox"{if $route_settings.dadata_email|default:0} checked="checked"{/if} name="route_settings[dadata_email]" value="1" />
+            Подсказки для поля E-mail
+        </div>
+    </div>
+    <div class="field dadata"{if !$route_settings.is_dadata|default:0} style="display:none;"{/if}>
+        <div class="value">
+            <input type="hidden" name="route_settings[dadata_address]" value="0" />
+            <input type="checkbox"{if $route_settings.dadata_address|default:0} checked="checked"{/if} name="route_settings[dadata_address]" value="1" />
+            Подсказки для полей Адреса
+            <p class="hint">
+                Подсказки для заполнения улицы, города, региона, страны
+            </p>
+        </div>
+    </div>
+    <div class="field">
+        <div class="name">
             Только для ПК
         </div>
         <div class="value no-shift s-ibutton-checkbox">
@@ -115,7 +175,7 @@
     </div>
 </div>
 
-<div class="field-group">
+<div class="field-group"{if !$route_settings.status|default:0} style="display:none;"{/if}>
 
     <div class="field">
         <a class="edit-templates" href="#"><i class="icon16 edit"></i>Шаблоны</a>

@@ -69,8 +69,18 @@
                         labelOff: "Выкл",
                         className: 'mini'
                     });
+                    $('input[name="route_settings[status]"]').change(function () {
+                        if ($(this).is(':checked')) {
+                            $(this).closest('.field-group').siblings().show(200);
+                        } else {
+                            $(this).closest('.field-group').siblings().hide(200);
+                        }
+                    });
                     $('input[name="route_settings[is_phonemask]"]').change(function () {
                         $('.field.phonemask').slideToggle('slow');
+                    });
+                    $('input[name="route_settings[is_dadata]"]').change(function () {
+                        $('.field.dadata').slideToggle('slow');
                     });
 
                     for (var i = 0; i < templates.length; i++) {

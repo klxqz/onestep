@@ -1,7 +1,7 @@
-<div class="checkout">
+<div class="checkout{if !empty($settings.sticky)} sticky{/if}">
     {if isset($checkout_steps)}
         <form class="checkout-form" method="post" action="">
-            <div class="checkout-step-content auth" >
+            <div class="checkout-step-content auth">
                 {if !$wa->user()->isAuth()}
                     <!-- authorized / not authorized selector -->
                     <ul class="menu-v">
@@ -28,45 +28,42 @@
             </div>
             {if shopDiscounts::isEnabled('coupons')}
                 <input type="hidden" name="coupon_code" value="{$coupon_code|escape}">
-            {/if}
-            {foreach $checkout_steps as $step_id => $s}
-
-                <div class="checkout-step step-{$step_id}" data-step="{$step_id}">
-
-                    <h2 class="{if isset($_upcoming_flag)}upcoming{/if}">
-                        <span class="gray">{$s@iteration}.</span> {$s.name}<span class="loading"></span>
-                    </h2>
-                    <div class="checkout-step-content">
-
-                        {if in_array($step_id,['contactinfo', 'shipping', 'payment', 'confirmation'])}
-                            {$checkout_tpls[$step_id]}
+            {/if} 
+            <div class="checkout-container">
+                <div class="checkout-main">
+                    {foreach $checkout_steps as $step_id => $s}
+                        {if !empty($settings.sticky) && $step_id == 'confirmation'}
+                        </div>
+                        <div class="checkout-sidebar">
                         {/if}
+                        <div class="checkout-step step-{$step_id}" data-step="{$step_id}">
 
-                        <div class="clear-both"></div>
+                            <h2 class="{if isset($_upcoming_flag)}upcoming{/if}">
+                                <span class="gray">{$s@iteration}.</span> {$s.name}<span class="loading"></span>
+                            </h2>
+                            <div class="checkout-step-content">
 
-                        {if $s@last}
-                            <div class="float-right">
-                                <input name="confirmation" type="hidden" value="1" >
-                                <input id="checkout-btn" type="submit" class="large bold" value="[`Place order`]">
+                                {if in_array($step_id,['contactinfo', 'shipping', 'payment', 'confirmation'])}
+                                    {$checkout_tpls[$step_id]}
+                                {/if}
+
+                                <div class="clear-both"></div>
+
+                                {if $s@last}
+                                    <div class="float-right">
+                                        <input name="confirmation" type="hidden" value="1" >
+                                        <input id="checkout-btn" type="submit" class="large bold" value="[`Place order`]">
+                                    </div>
+                                {/if}
+                                <div class="clear-both"></div>
                             </div>
-                        {/if}
-                        <div class="clear-both"></div>
-                    </div>
 
+                        </div>
+
+                    {/foreach}
                 </div>
-
-            {/foreach}
+                <div class="clear-both"></div>
+            </div>
         </form>
     {/if}
-
 </div>
-
-<script type="text/javascript">
-    $.onestep.init({
-        shipping_url: "{$wa->getUrl('/frontend/shipping',['plugin' => 'onestep'])}",
-        validate: {intval($settings.validate)},
-        is_phonemask: {intval($settings.is_phonemask)},
-        phonemask: "{$settings.phonemask|escape}",
-        submit: {intval($wa->post('confirmation'))}
-    });
-</script>
