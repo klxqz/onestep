@@ -386,7 +386,7 @@
             $('ul.checkout-options li input[name=shipping_id]').each(function () {
                 var shipping_id = $(this).val();
                 var $city_field = $('[name="customer_' + shipping_id + '[address.shipping][city]"]');
-                if ($city_field.length) {
+                if ($city_field.length && self.options.is_dadata) {
                     $city_field.suggestions({
                         token: self.options.dadata_key,
                         type: "ADDRESS",
@@ -425,6 +425,10 @@
 
             });
 
+            if (!$('.checkout-options.shipping [name=shipping_id]:checked').lenght) {
+                $('.checkout-options.shipping [name=shipping_id]:first').attr('checked', true);
+            }
+
             var self = this;
             $('input[name=shipping_id],.shipping-rates').change(function () {
                 self.reloadSteps(['payment', 'confirmation']);
@@ -432,6 +436,9 @@
         },
         initPayment: function () {
             this.paymentOptions();
+            if (!$('.checkout-options.payment [name=payment_id]:checked').lenght) {
+                $('.checkout-options.payment [name=payment_id]:first').attr('checked', true);
+            }
         },
         initConfirmation: function () {
 
