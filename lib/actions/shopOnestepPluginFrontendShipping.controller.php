@@ -1,8 +1,10 @@
 <?php
 
-class shopOnestepPluginFrontendShippingController extends shopFrontendShippingController {
+class shopOnestepPluginFrontendShippingController extends shopFrontendShippingController
+{
 
-    public function execute() {
+    public function execute()
+    {
         $cart = new shopCart();
         $total = $cart->total();
 
@@ -52,6 +54,14 @@ class shopOnestepPluginFrontendShippingController extends shopFrontendShippingCo
             foreach ($shipping_ids as $shipping_id) {
                 $this->response[$shipping_id] = $this->getRates($shipping_id, $items, $address, $total);
             }
+
+            if (method_exists($this, 'formatRates')) {
+                foreach ($this->response as &$rates) {
+                    $rates = $this->formatRates($rates);
+                    unset($rates);
+                }
+            }
+
         }
     }
 
