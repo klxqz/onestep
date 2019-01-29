@@ -1,4 +1,6 @@
 <?php
 
 $domains_settings = array();
-shopOnestep::saveDomainsSettings($domains_settings);
+if (class_exists('shopOnestep')) {
+    shopOnestep::saveDomainsSettings($domains_settings);
+}
