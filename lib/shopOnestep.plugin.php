@@ -133,6 +133,10 @@ class shopOnestepPlugin extends shopPlugin {
             return;
         }
 
+        if(wa()->getEnv() !== 'frontend') {
+            return [];
+        }
+        
         if (shopOnestepHelper::getRouteSettings(null, 'status')) {
             $route_settings = shopOnestepHelper::getRouteSettings();
         } elseif (shopOnestepHelper::getRouteSettings(0, 'status')) {
