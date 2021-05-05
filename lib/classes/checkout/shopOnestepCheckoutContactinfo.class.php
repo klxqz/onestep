@@ -204,7 +204,7 @@ class shopOnestepCheckoutContactinfo extends shopCheckoutContactinfo {
             }
         }
 
-        if ($shipping = $this->getSessionData('shipping') && !waRequest::post('ignore_shipping_error')) {
+        if (($shipping = $this->getSessionData('shipping')) && !waRequest::post('ignore_shipping_error')) {
             $shipping_step = new shopCheckoutShipping();
             $rate_id = isset($shipping['rate_id']) ? $shipping['rate_id'] : null;
             $rate = $shipping_step->getRate($shipping['id'], $rate_id, $contact);
